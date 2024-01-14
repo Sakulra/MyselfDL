@@ -1,19 +1,113 @@
-1. conda --version #查看conda版本，验证是否安装
-2. conda update conda #更新至最新版本，也会更新其它相关包
-3. conda update --all #更新所有包
-4. conda update package_name #更新指定的包
-5. conda create -n env_name package_name #创建名为env_name的新环境，并在该环境下安装名为package_name 的包，可以指定新环境的版本号。
-   例如：conda create -n python2 python=python2.7 numpy pandas，创建了python2环境，python版本为2.7，同时还安装了numpy pandas包
+@1.conda的操作
+  1. conda --version #查看conda版本，验证是否安装
+  2. conda update conda #更新至最新版本，也会更新其它相关包
+  3. conda update --all #更新所有包
+  4. conda update package_name #更新指定的包
+  5. conda create -n env_name package_name #创建名为env_name的新环境，并在该环境下安装名为package_name 的包，
+   可以指定新环境的版本号。例如：conda create -n python2 python=python2.7 numpy pandas，
+   创建了python2环境，python版本为2.7，同时还安装了numpy pandas包
    也可conda create --name d2l python=3.9 -y 就单纯创建一个名叫d2l的环境，并装有3.9的python
-6. conda activate env_name #切换至env_name环境
-7. conda deactivate #退出环境
-8. conda info -e #显示所有已经创建的环境
-9. conda create --name new_env_name --clone old_env_name #复制old_env_name为new_env_name
-10. conda remove --name env_name –all #删除环境
-11. conda list #查看所有已经安装的包
-12. conda install package_name #在当前环境中安装包
-13. conda install --name env_name package_name #在指定环境中安装包
-14. conda remove -- name env_name package #删除指定环境中的包
-15. conda remove package #删除当前环境中的包
-16. conda env remove -n env_name #采用第10条的方法删除环境失败时，可采用这种方法
-17.
+  6. conda activate env_name #切换至env_name环境
+  7. conda deactivate #退出环境
+  8. conda info -e #显示所有已经创建的环境
+  9. conda create --name new_env_name --clone old_env_name #复制old_env_name为new_env_name
+  10. conda remove --name env_name –all #删除环境
+  11. conda list #查看所
+  有已经安装的包
+  12. conda install package_name #在当前环境中安装包
+  13. conda install --name env_name package_name #在指定环境中安装包
+  14. conda remove -- name env_name package #删除指定环境中的包
+  15. conda remove package #删除当前环境中的包
+  16. conda env remove -n env_name #采用第10条的方法删除环境失败时，可采用这种方法
+@2.将远程端口映射到本地，这样本地就可以打开远端的地址了
+   ssh -L8888:localhost:8888 ubuntu@用户名
+@3.norm默认求L2范数
+@4.神经网络层数不计入输入层。每个输入都与每个输出相连，我们将这种变换称为全连接层（fully-connected layer）
+   或称为稠密层（dense layer）
+@5.要看某个向量或者矩阵a的形状时，a.shape,没有括号，加括号的时候是shape([1]),括号里面是要得到形状的对象，错好几次了。
+@6.如果a是3x2的矩阵，len(a)返回的是矩阵的行数。
+@7.batch_size其实越小对损失函数的收敛越有益，因为对于深度神经网络是很复杂的，当batch_size比较小的时候，
+  在同一批次中噪音比例就会变大，而噪音对神经网络是有好处的，它可以增加算法鲁棒性
+
+2.矩阵a的截取：a[起始行：结束行，起始列：结束列]，如果只截取某2列为a[,1]，因为第二列的索引是1，
+   a[2]只截取第三行
+   还有a[起始行：结束行：间隔行，起始列：结束列：间隔列],如a[::3,::2]，从第零行开始，每三行一跳，每两列一跳
+
+
+3.矩阵切片loc和iloc。loc函数：通过行索引 "Index" 中的具体值来取行数据（如取"Index"为"A"的行）
+   iloc函数：通过行号来取行数据（如取第二行的数据）。
+#创建一个Dataframe
+data=pd.DataFrame(np.arange(9).reshape(3,3),index=list('abc'),columns=list('ABC'))
+Out: 
+    A   B   C
+a   0   1   2
+b   4   5   6
+c   8   9  10
+#取索引为'a'的行
+In: data.loc['a']
+Out:
+A    0
+B    1
+C    2
+#取第一行数据，索引为'a'的行就是第一行，所以结果相同
+In: data.iloc[0]
+Out:
+A    0
+B    1
+C    2
+In:data.loc[['a','b'],['A','B']] #提取index为'a','b',列名为'A','B'中的数据
+Out: 
+   A  B
+a  0  1
+b  4  5
+In:data.iloc[[0,1],[0,1]] #提取第0、1行，第0、1列中的数据
+Out: 
+   A  B
+a  0  1
+b  4  5
+
+4.item()的作用是取出单元素张量的元素值并返回该值，保持该元素类型不变。
+  a=torch.tensor([3.5])
+  a.item()
+  就可以得到数值3.5而不是向量[3.5]
+
+5.os.path.join(path, *paths)
+  path：代表文件系统路径的path-like对象。
+  *paths：代表文件系统路径的path-like对象。它表示要连接的路径组件。
+  从后往前看，会从第一个以'/'开头的参数开始拼接，之前的参数全部丢弃；以上一种情况为先。在上一种情况确保情况下，
+  若出现'./'开头的参数，会从'./'开头的参数的前面参数全部保留。如果最后一个组件为空，则生成的路径以一个’/’分隔符结尾。
+
+   print("1:", os.path.join('aaaa', '/bbbb', 'ccccc.txt'))
+   print("2:", os.path.join('/aaaa', '/bbbb', '/ccccc.txt'))
+   print("3:", os.path.join('aaaa', 'bbbb', './cccc', 'ccccc.txt'))
+   print("4:", os.path.join('aaaa', 'bbbb', './cccc', '/dddd', 'ccccc.txt'))
+   print("5:", os.path.join('aaaa', 'bbbb', 'cccc', 'dddd', 'ccccc.txt'))
+   print("6:", os.path.join('aaaa', 'bbbb', 'cccc', 'dddd', ''))
+   输出结果为：
+   1: /bbbb/ccccc.txt
+   2: /ccccc.txt
+   3: aaaa/bbbb/./cccc/ccccc.txt
+   4: /dddd/ccccc.txt
+   5: aaaa/bbbb/cccc/dddd/ccccc.txt
+   6: aaaa/bbbb/cccc/dddd/
+6.os.mkdir(path,mode),mode就是文件权限4，2，1，代表读，写，执行。
+  mkdir只能创建一个目录，如果路径中存在两个要创建的目录会报错
+  os.makedirs(path,mode，exist_ok=False)递归创建目录，exist_ok：如果已经存在怎么处理，默认是 False ，
+  即：已经存在程序报错。当为 True 时，创建目录的时候如果已经存在就不报错。
+7.pytorch创建的张量默认是行向量，0轴--行，1轴--列，2轴--深度
+8.torch.noraml(means, std, out=None)返回一个张量，包含从给定参数means,std的离散正态分布中抽取随机数。 
+  均值means是一个张量，包含每个输出元素相关的正态分布的均值。 std是一个张量，
+  包含每个输出元素相关的正态分布的标准差。 均值和标准差的形状不须匹配，但每个张量的元素个数须相同。
+9.torch.matmul(input, other) → Tensor
+  计算两个张量input和other的矩阵乘积
+ 【注意】：matmul函数没有强制规定维度和大小，可以用利用广播机制进行不同维度的相乘操作。
+10.plt.scatter(x, y, s=None, c=None, marker=None,alpha=None, linewidths=None,edgecolors=None)
+  x, y → 散点的坐标
+  s → 散点的面积,也就是画的每个点的面积
+  c → 散点的颜色（默认值为蓝色，'b'，其余颜色同plt.plot( )）
+  marker → 散点样式（默认值为实心圆，'o'，其余样式同plt.plot( )）
+  alpha → 散点透明度（[0, 1]之间的数，0表示完全透明，1则表示完全不透明）
+  linewidths →散点的边缘线宽
+  edgecolors → 散点的边缘颜色
+  详情：https://zhuanlan.zhihu.com/p/111331057
+11.
