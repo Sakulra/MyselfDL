@@ -16,8 +16,27 @@
 #     f.write('2,NA,106000\n')
 #     f.write('4,NA,178100\n')
 #     f.write('NA,NA,140000\n')
+###################################向tenser矩阵传递向量索引
+# import torch
+# index=torch.tensor([0,2])
+# a=torch.tensor([[1,2,3],[4,5,6],[7,8,9]])
+# print(a[index])
+#################
+from torch.utils import data
 import torch
-indexes=[0,1,2,3,4,5,6,7,8,9]
-index=torch.tensor([2,4,6])
-a=['a','b','c','d','e','f','g','h','i','j']
-print(a[index])
+
+a = torch.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9]])
+b = torch.tensor([44, 55, 66, 44, 55, 66, 44, 55, 66])
+
+# TensorDataset对tensor进行打包
+train_ids = data.TensorDataset(a, b) 
+for x_train, y_label in train_ids:
+    print(x_train, y_label)
+
+# dataloader进行数据封装
+print('=' * 80)
+train_loader = data.DataLoader(dataset=train_ids, batch_size=3, shuffle=True)
+for i, data in enumerate(train_loader, 1):  
+# 注意enumerate返回值有两个,一个是序号，一个是数据（包含训练数据和标签）
+    x_data, label = data
+    print(' batch:{0} x_data:{1}  label: {2}'.format(i, x_data, label))

@@ -28,7 +28,7 @@
 @6.如果a是3x2的矩阵，len(a)返回的是矩阵的行数。
 @7.batch_size其实越小对损失函数的收敛越有益，因为对于深度神经网络是很复杂的，当batch_size比较小的时候，
   在同一批次中噪音比例就会变大，而噪音对神经网络是有好处的，它可以增加算法鲁棒性
-
+@8.全连接层在Linear类中定义；计算均方误差使用的是MSELoss类；SGD(小批量随机梯度下降算法)在optim模块中实现；
 2.矩阵a的截取：a[起始行：结束行，起始列：结束列]，如果只截取某2列为a[,1]，因为第二列的索引是1，
    a[2]只截取第三行
    还有a[起始行：结束行：间隔行，起始列：结束列：间隔列],如a[::3,::2]，从第零行开始，每三行一跳，每两列一跳
@@ -110,4 +110,47 @@ b  4  5
   linewidths →散点的边缘线宽
   edgecolors → 散点的边缘颜色
   详情：https://zhuanlan.zhihu.com/p/111331057
-11.
+11.向tensor矩阵传递向量索引，可以得到向量索引中的每个元素对应矩阵的行，A=tensor([[1,2,3],[4,5,6],[7,8,9]]),
+   b=tensor([0,1]),c=tensor([1,2])，d=tensor([0,2])
+   A[b]:tensor([[1,2,3],[4,5,6]])，得到A矩阵的第零行和第一行
+   A[c]:tensor([[4,5,6],[7,8,9]])
+   A[d]:tensor([[1,2,3],[7,8,9]])，得到矩阵A的第零行和第二行
+12.with torch.no_grad():  表示所有计算得出的tensor的requires_grad都自动设置为False，反向传播时就不会自动求导了，
+   从而节省计算开支。
+13.data.TensorDataset() 可以用来对 tensor 进行打包，就好像 python 中的 zip 功能。该类通过每一个 tensor 的
+   第一个维度进行索引。因此，该类中的 tensor 第一维度必须相等. 另外：TensorDataset 中的参数必须是 tensor.
+14.data.DataLoader()就是用来包装所使用的数据，把训练数据分成多个小组，每次抛出一批数据.
+   a = torch.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9]])
+   b = torch.tensor([44, 55, 66, 44, 55, 66, 44, 55, 66])
+   # TensorDataset对tensor进行打包
+   train_ids = TensorDataset(a, b) 
+   for x_train, y_label in train_ids:
+      print(x_train, y_label)
+输出结果为：
+tensor([1, 2, 3]) tensor(44)
+tensor([4, 5, 6]) tensor(55)
+tensor([7, 8, 9]) tensor(66)
+tensor([1, 2, 3]) tensor(44)
+tensor([4, 5, 6]) tensor(55)
+tensor([7, 8, 9]) tensor(66)
+tensor([1, 2, 3]) tensor(44)
+tensor([4, 5, 6]) tensor(55)
+tensor([7, 8, 9]) tensor(66)
+
+# dataloader进行数据封装
+train_loader = DataLoader(dataset=train_ids, batch_size=3, shuffle=True)
+for i, data in enumerate(train_loader, 1):  
+# 注意enumerate返回值有两个,一个是序号，一个是数据（包含训练数据和标签）
+    x_data, label = data
+    print(' batch:{0} x_data:{1}  label: {2}'.format(i, x_data, label))
+输出结果为：
+ batch:1 x_data:tensor([[7, 8, 9],
+        [1, 2, 3],
+        [4, 5, 6]])  label: tensor([66, 44, 55])
+ batch:2 x_data:tensor([[4, 5, 6],
+        [4, 5, 6],
+        [1, 2, 3]])  label: tensor([55, 55, 44])
+ batch:3 x_data:tensor([[1, 2, 3],
+        [7, 8, 9],
+        [7, 8, 9]])  label: tensor([44, 66, 66])
+15.
