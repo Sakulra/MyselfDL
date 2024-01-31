@@ -101,7 +101,29 @@ b  4  5
 9.torch.matmul(input, other) → Tensor
   计算两个张量input和other的矩阵乘积
  【注意】：matmul函数没有强制规定维度和大小，可以用利用广播机制进行不同维度的相乘操作。
-10.plt.scatter(x, y, s=None, c=None, marker=None,alpha=None, linewidths=None,edgecolors=None)
+10.如果将Matplotlib绘图和我们平常画画相类比，可以把Figure想象成一张纸（一般被称之为画布），Axes代表的则是纸中的一片区域，axis是轴。
+  plt绘图：第一种方式的代码来看，先生成了一个Figure画布，然后在这个画布上隐式生成一个画图区域进行画图。
+  plt.figure()
+  plt.plot([1,2,3],[4,5,6])
+  plt.show()
+  ax绘图：第二种方式同时生成了Figure和axes两个对象，然后用ax对象在其区域内进行绘图
+  fig,ax = plt.subplots()
+  ax.plot([1,2,3],[4,5,6])
+  plt.show()
+  也就是说fig, ax = plt.subplots()是fig = plt.figure()
+                                  ax = fig.add_subplot(111)
+   的简写
+
+  plot()：用于绘制线图和散点图
+  scatter()：用于绘制散点图
+  bar()：用于绘制垂直条形图和水平条形图
+  hist()：用于绘制直方图
+  pie()：用于绘制饼图
+  imshow()：用于绘制图像
+  subplot():用于创建子图
+  subplots()：用于创建子图
+
+  plt.scatter(x, y, s=None, c=None, marker=None,alpha=None, linewidths=None,edgecolors=None)
   x, y → 散点的坐标
   s → 散点的面积,也就是画的每个点的面积
   c → 散点的颜色（默认值为蓝色，'b'，其余颜色同plt.plot( )）
@@ -110,16 +132,59 @@ b  4  5
   linewidths →散点的边缘线宽
   edgecolors → 散点的边缘颜色
   详情：https://zhuanlan.zhihu.com/p/111331057
-11.向tensor矩阵传递向量索引，可以得到向量索引中的每个元素对应矩阵的行，A=tensor([[1,2,3],[4,5,6],[7,8,9]]),
+
+  ax = plt.gca() #获取当前坐标轴
+  ax.set_title('第一张图')
+  ax.set_ylabel('T(C)')
+  ax.set_xlabel('Time')
+  ax.legend()
+  ax.axes.get_xaxis().set_visible(False)隐藏x坐标轴
+  ax.axes.get_yaxis().set_visible(False)隐藏y坐标轴
+
+  ax.flatten()是对多维数据的降维函数。
+  ax.flatten(),默认缺省参数为0，也就是说flatten()和flatte(0)效果一样。python里的flatten(dim)表示，从第dim个维度开始展开，
+  将后面的维度转化为一维.也就是说，只保留dim之前的维度，其他维度的数据全都挤在dim这一维。
+11.
+  画布参数plt.figure：
+  fig=plt.figure(figsize=(4,3),facecolor='blue')  # 4*3 英寸，蓝色背景
+
+  图例注释plt.legend()让标签显示出来：
+  plt.legend(loc=3) #写3和'lower left'都可以
+
+  创建子图subplot或subplots：
+  区别：subplots() 既创建了一个包含子图区域的画布，又创建了一个 figure 图形对象，而 subplot() 只是创建一个包含子图区域的画布。
+  subplot(nrows, ncols, index)
+  subplots(nrows, ncols,sharex=False, sharey=False，figsize)
+  示例：
+  plt.subplot(221) #两行两列的第1个子图
+  plt.plot(x,y)对第一个子图进行绘画
+  plt.subplot(222) #两行两列的第2个子图
+  plt.plot(x,y)对第二个子图进行绘画
+
+  fig, axs = plt.subplots(2, 2)
+  axs[0][0].plot(x, y)对第一个子图进行绘画
+  axs[1][1].scatter(x, y)对第四个子图进行绘画
+  不想用axs[,]可以
+  f, ([ax1, ax2],[ax3,ax4]) = plt.subplots(2, 2, sharex=True)
+  直接指定每一块区域的名字，然后直接用ax1，ax2，ax3，ax4来指定操作区域即可
+12.向tensor矩阵传递向量索引，可以得到向量索引中的每个元素对应矩阵的行，A=tensor([[1,2,3],[4,5,6],[7,8,9]]),
    b=tensor([0,1]),c=tensor([1,2])，d=tensor([0,2])
    A[b]:tensor([[1,2,3],[4,5,6]])，得到A矩阵的第零行和第一行
    A[c]:tensor([[4,5,6],[7,8,9]])
    A[d]:tensor([[1,2,3],[7,8,9]])，得到矩阵A的第零行和第二行
-12.with torch.no_grad():  表示所有计算得出的tensor的requires_grad都自动设置为False，反向传播时就不会自动求导了，
+13.with torch.no_grad():  表示所有计算得出的tensor的requires_grad都自动设置为False，反向传播时就不会自动求导了，
    从而节省计算开支。
-13.data.TensorDataset() 可以用来对 tensor 进行打包，就好像 python 中的 zip 功能。该类通过每一个 tensor 的
+14.data.TensorDataset() 以用来对tensor进行打包，就好像python中的zip功能。该类通过每一个tensor的
    第一个维度进行索引。因此，该类中的 tensor 第一维度必须相等. 另外：TensorDataset 中的参数必须是 tensor.
-14.data.DataLoader()就是用来包装所使用的数据，把训练数据分成多个小组，每次抛出一批数据.
+15.zip()函数用于将可迭代的对象作为参数，将对象中对应的元素打包成一个个元组，然后返回由这些元组组成的列表。
+   如果各个迭代器的元素个数不一致，则返回列表长度与最短的对象相同，利用 * 号操作符，可以将元组解压为列表
+   a = [1,2,3]
+   b = [4,5,6,7,8]
+   zipped = zip(a,b)     # 打包为元组的列表
+输出为：[(1, 4), (2, 5), (3, 6)]
+   zip(*zipped)    # 与 zip 相反，*zipped 可理解为解压，返回二维矩阵式
+输出为：[(1, 2, 3), (4, 5, 6)]
+16.data.DataLoader()就是用来包装所使用的数据，把训练数据分成多个小组，每次抛出一批数据.
    a = torch.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9]])
    b = torch.tensor([44, 55, 66, 44, 55, 66, 44, 55, 66])
    # TensorDataset对tensor进行打包
@@ -137,7 +202,7 @@ tensor([1, 2, 3]) tensor(44)
 tensor([4, 5, 6]) tensor(55)
 tensor([7, 8, 9]) tensor(66)
 
-# dataloader进行数据封装
+# dataloader进行数据封装,就是拿出批次大小的数据里面的内容就是dataset()后的形式一般是[(数据1，标签1)，(数据2，标签2),]
 train_loader = DataLoader(dataset=train_ids, batch_size=3, shuffle=True)
 for i, data in enumerate(train_loader, 1):  
 # 注意enumerate返回值有两个,一个是序号，一个是数据（包含训练数据和标签）
@@ -153,8 +218,11 @@ for i, data in enumerate(train_loader, 1):
  batch:3 x_data:tensor([[1, 2, 3],
         [7, 8, 9],
         [7, 8, 9]])  label: tensor([44, 66, 66])
-15.独热编码（one-hot encoding）,独热编码是一个向量，它的分量和类别一样多。 类别对应的分量设置为1，其他所有分量设置为0。
-16.交叉熵损失（cross-entropy loss），它是分类问题最常用的损失之一。交叉熵从P到Q，记为H(P,Q)。可以把交叉熵想象为“主观概率
+17.独热编码（one-hot encoding）,独热编码是一个向量，它的分量和类别一样多。 类别对应的分量设置为1，其他所有分量设置为0。
+18.交叉熵损失（cross-entropy loss），它是分类问题最常用的损失之一。交叉熵从P到Q，记为H(P,Q)。可以把交叉熵想象为“主观概率
    为Q的观察者在看到根据概率P生成的数据时的预期惊异”。当P=Q时，交叉熵达到最低。交叉熵是一个衡量两个概率分布之间差异的很好的度量，
    它测量给定模型编码数据所需的比特数。
-17.
+19.iter(object)用来生成迭代器，迭代器是一个可以记住遍历的位置的对象。object -- 支持迭代的集合对象。
+   一类是：list、tuple、dict、set、str。二类是：generator（都是Iterator对象），包含生成器和带yield的generator function
+   生成器不但可以作用于for，还可以被next函数不断调用并且返回下一个值，可以被next函数不断调用返回下一个值的对象称为迭代器（Iterator）。
+20.next(iterator),iterator--可迭代的对象,iter()把目标转为可迭代的对象，然后通过next(iterator)访问每一个可迭代的对象。
