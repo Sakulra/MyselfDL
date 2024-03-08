@@ -16,27 +16,50 @@
 #     f.write('2,NA,106000\n')
 #     f.write('4,NA,178100\n')
 #     f.write('NA,NA,140000\n')
-###################################向tenser矩阵传递向量索引
+###################################向tenser矩阵传递向量索引#########################################
 # import torch
 # index=torch.tensor([0,2])
 # a=torch.tensor([[1,2,3],[4,5,6],[7,8,9]])
 # print(a[index])
-#################
-from torch.utils import data
-import torch
+##################################################################################################
+# from torch.utils import data
+# import torch
 
-a = torch.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9]])
-b = torch.tensor([44, 55, 66, 44, 55, 66, 44, 55, 66])
+# a = torch.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9]])
+# b = torch.tensor([44, 55, 66, 44, 55, 66, 44, 55, 66])
 
 # TensorDataset对tensor进行打包
-train_ids = data.TensorDataset(a, b) 
-for x_train, y_label in train_ids:
-    print(x_train, y_label)
+# train_ids = data.TensorDataset(a, b) 
+# print(train_ids[1])
+# for x_train, y_label in train_ids:
+#     print(x_train, y_label)
 
 # dataloader进行数据封装
-print('=' * 80)
-train_loader = data.DataLoader(dataset=train_ids, batch_size=3, shuffle=True)
-for i, data in enumerate(train_loader, 1):  
-# 注意enumerate返回值有两个,一个是序号，一个是数据（包含训练数据和标签）
-    x_data, label = data
-    print(' batch:{0} x_data:{1}  label: {2}'.format(i, x_data, label))
+# print('=' * 80)
+# train_loader = data.DataLoader(dataset=train_ids, batch_size=3, shuffle=True)
+# print(train_loader)
+# for data in train_loader:
+#     print(data)
+# for i, data in enumerate(train_loader, 1):  
+# # 注意enumerate返回值有两个,一个是序号，一个是数据（包含训练数据和标签）
+#     x_data, label = data
+#     print(' batch:{0} x_data:{1}  label: {2}'.format(i, x_data, label))
+
+###########################################
+import torch
+# a = torch.tensor([[1,2,3]],[4,5,6])
+# b = torch.tensor([1,2,3])
+# print(a+b)
+
+# x = torch.arange(12).reshape(4,3)
+# print(x)
+# rows = torch.tensor([[0,0],[3,3]]) 
+# cols = torch.tensor([[0,2],[0,2]])
+# y = x[rows,cols]
+# print (y)
+
+y_hat = torch.arange(6).reshape(2,3)
+print(y_hat)
+y = torch.tensor([0,2])
+print(range(len(y_hat)))
+# print (y_hat[range(len(y_hat)),y])

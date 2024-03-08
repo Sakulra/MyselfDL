@@ -39,12 +39,13 @@ class Timer:
 # 并除以255使得所有像素的数值均在0～1之间
 trans = transforms.ToTensor()
 #mnist_train是n行两列的矩阵，第一列数据，第二列标签
+#transform参数: 指定数据预处理的方法，这里使用了transforms.ToTensor()。
 mnist_train = torchvision.datasets.FashionMNIST(
     root="../../dataset", train=True, transform=trans, download=True)
 mnist_test = torchvision.datasets.FashionMNIST(
     root="../../dataset", train=False, transform=trans, download=True)
 
-#数据集中包含的图片书
+#数据集中包含的图片数
 print(len(mnist_train), len(mnist_test))
 #每张图片的大小，每张图片就相当于一个正方体横着一片一片切下来的片
 #mnist_train[0][0]表示第一张图片的数据，mnist_train[0][1]表示第一张图片的标签
@@ -61,7 +62,7 @@ def get_fashion_mnist_labels(labels:list) ->list[str]:
 #可视化样本，法一
 def show_images(imgs,num_rows,num_cols,titles=None,scale=1.5):
     """绘制图像列表"""
-    #xscale和yscale函数的作用都是设置坐标轴的缩放类型，默认的坐标轴缩放类型为："linear"
+    #xscale和yscale函数的作用都是设置坐标轴的缩放类型，默认的坐标轴缩放类型为："linear"线性
     figsize = (num_cols*scale,num_rows*scale)
     _,axes = d2l.plt.subplots(num_rows,num_cols,figsize=figsize)#返回的axes是num_rows行num_cols列的矩阵
     # print(axes)
@@ -82,11 +83,11 @@ def show_images(imgs,num_rows,num_cols,titles=None,scale=1.5):
         if titles:
             ax.set_title(titles[i])
     return axes 
-#可视化样本，法二
+#可视化样本，法二,但是下面调用的代码需要进行一些修改
 def show_images2(imgs,num_cols,titles):
     # display.set_matplotlib_formats('svg')
     d2l.use_svg_display()
-    num_cols = int(len(imgs)/num_cols)
+    num_rows = int(len(imgs)/num_cols)
     _,figs = plt.subplots(num_cols,num_rows)
     figs = figs.flatten()
     for f,img,lbl in zip(figs,imgs,titles):#zip将对象中对应的元素打包成一个个元组，然后返回由这些元组组成的列表
@@ -97,8 +98,9 @@ def show_images2(imgs,num_cols,titles):
     plt.show()
 
 
-images,num_labels = next(iter(data.DataLoader(mnist_train,batch_size=18)))#num_labels是数字标号，其实就是做数据集的时候把相应的label英文名转换为数字
-#print(num_labels)#tensor([9, 0, 0, 3, 0, 2, 7, 2, 5, 5, 0, 9, 5, 5, 7, 9, 1, 0])
+images,num_labels = next(iter(data.DataLoader(mnist_train,batch_size=18)))
+#num_labels是数字标号，其实就是做数据集的时候把相应的label英文名转换为数字
+#print(num_labels)#输出tensor([9, 0, 0, 3, 0, 2, 7, 2, 5, 5, 0, 9, 5, 5, 7, 9, 1, 0])
 show_images(images.reshape(18,28,28),2,9,titles=get_fashion_mnist_labels(num_labels))
 d2l.plt.show()
 
@@ -115,3 +117,26 @@ timer = d2l.Timer()
 for x,y in train_iter:
     continue
 print(f'{timer.stop():2f}sec')
+
+#整合所有组件
+def load_data_fashion_minist(batch_size,resize=None):
+    """加载数据集，并可选择调整数据集中每个数据的大小，最后将数据集使用dataloader()返回"""
+    #这里放在列表里面是为了后面如果resize部位none，好在转换列表添加转换操作
+    trans=[transforms.ToTensor()]
+    #这里创建了一个数据转换列表 trans。如果 resize 不为 None，
+    #则在转换列表的最前面插入一个 transforms.Resize(resize) 转换。
+    #然后，通过 transforms.Compose(trans) 创建一个组合转换，这样可以按照列表中的顺序应用这些转换。
+    if resize:
+        trans.insert(0,transforms.Resize(resize))
+    trans=transforms.Compose(trans)
+    mnist_train = torchvision.datasets.FashionMNIST(
+        root="../../dataset", train=True, transform=trans, download=True)
+    mnist_test = torchvision.datasets.FashionMNIST(
+        root="../../dataset", train=False, transform=trans, download=True)
+    return(data.DataLoader(mnist_train,batch_size,shuffle=True,num_workers=get_dataloader_workers()),
+           data.DataLoader(mnist_test,batch_size,shuffle=True,num_workers=get_dataloader_workers()))
+
+train_iter,test_iter = load_data_fashion_minist(batch_size=32,resize=64)
+for x,y in train_iter:#x是数据，y是标签
+    print(x.shape,x.dtype,y.shape,y.dtype)
+    break

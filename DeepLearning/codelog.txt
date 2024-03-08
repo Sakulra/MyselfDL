@@ -12,8 +12,7 @@
   8. conda info -e #显示所有已经创建的环境
   9. conda create --name new_env_name --clone old_env_name #复制old_env_name为new_env_name
   10. conda remove --name env_name –all #删除环境
-  11. conda list #查看所
-  有已经安装的包
+  11. conda list #查看所有已经安装的包
   12. conda install package_name #在当前环境中安装包
   13. conda install --name env_name package_name #在指定环境中安装包
   14. conda remove -- name env_name package #删除指定环境中的包
@@ -24,15 +23,32 @@
 @3.norm默认求L2范数
 @4.神经网络层数不计入输入层。每个输入都与每个输出相连，我们将这种变换称为全连接层（fully-connected layer）
    或称为稠密层（dense layer）
-@5.要看某个向量或者矩阵a的形状时，a.shape,没有括号，加括号的时候是shape([1]),括号里面是要得到形状的对象，错好几次了。
-@6.如果a是3x2的矩阵，len(a)返回的是矩阵的行数。
+@5.要看某个向量或者矩阵a的形状时，a.shape,没有括号，因为shape是属性，可用中括号读取指定维度的大小,shape[1]就是读取轴1的形状。
+   也可项shape传递具体矩阵这时候要加括号shape([1,2]).
+   a.size()也可查看形状，size是函数所以要加括号。
+
+   维度(dim)和轴(axis)，只有指定的维度是可变的，其他都是固定的，numpy用axis，pytorch用dim，二者其实是一样的
+     axis：0轴从第一层向最深层方向
+         1轴沿着0行到1行的方向垂直向下(纵向),按行计算(列不变)，得到列的性质；
+         2轴沿着0列到1列的方向水平延伸(横向),按列计算，得到行的性质
+     dim：正数就从外面往里数，第一层是0，负数就从里往外数，第一层也是
+@6.如果a是3x2的矩阵，len(a)返回的是矩阵的行数。矩阵[p,m,n]其中p代表p个切片，m代表m行，n代表n列。
 @7.batch_size其实越小对损失函数的收敛越有益，因为对于深度神经网络是很复杂的，当batch_size比较小的时候，
   在同一批次中噪音比例就会变大，而噪音对神经网络是有好处的，它可以增加算法鲁棒性
 @8.全连接层在Linear类中定义；计算均方误差使用的是MSELoss类；SGD(小批量随机梯度下降算法)在optim模块中实现；
 2.矩阵a的截取：a[起始行：结束行，起始列：结束列]，如果只截取某2列为a[,1]，因为第二列的索引是1，
    a[2]只截取第三行
-   还有a[起始行：结束行：间隔行，起始列：结束列：间隔列],如a[::3,::2]，从第零行开始，每三行一跳，每两列一跳
-
+   还有a[起始行：结束行：间隔行，起始列：结束列：间隔列],如a[::3,::2]，从第零行开始，每三行一跳，每两列一跳.
+   高级索引:在numpy或pytorch等框架中对张量的操作不只有类似列表的切片索引等操作，还提供了高级索引,整数数组索引、布尔索引及花式索引。
+   整数数组索引：
+   x=[[0,1,2]
+      [3,4,5]
+      [6,7,8]]
+   1.取出其(0,0)，(1,1)和(2,0)位置处的元素,给出两个一维数组分别指定第0维和第1维,x[[0,1,2],[0,1,0]]
+   2.传入的位置指定数组也可为多维，取出其[[(0,0),(0,2)]，[(3,0),(3,2)]]的元素
+   rows = torch.tensor([[0,0],[3,3]]) 
+   cols = torch.tensor([[0,2],[0,2]])
+   y = x[rows,cols]
 
 3.矩阵切片loc和iloc。loc函数：通过行索引 "Index" 中的具体值来取行数据（如取"Index"为"A"的行）
    iloc函数：通过行号来取行数据（如取第二行的数据）。
@@ -66,7 +82,7 @@ Out:
 a  0  1
 b  4  5
 
-4.item()的作用是取出单元素张量的元素值并返回该值，保持该元素类型不变。
+4.item()的作用是取出单元素张量的元素数值并返回该数值，保持原元素类型不变。
   a=torch.tensor([3.5])
   a.item()
   就可以得到数值3.5而不是向量[3.5]
@@ -77,13 +93,13 @@ b  4  5
   从后往前看，会从第一个以'/'开头的参数开始拼接，之前的参数全部丢弃；以上一种情况为先。在上一种情况确保情况下，
   若出现'./'开头的参数，会从'./'开头的参数的前面参数全部保留。如果最后一个组件为空，则生成的路径以一个’/’分隔符结尾。
 
-   print("1:", os.path.join('aaaa', '/bbbb', 'ccccc.txt'))
-   print("2:", os.path.join('/aaaa', '/bbbb', '/ccccc.txt'))
-   print("3:", os.path.join('aaaa', 'bbbb', './cccc', 'ccccc.txt'))
-   print("4:", os.path.join('aaaa', 'bbbb', './cccc', '/dddd', 'ccccc.txt'))
-   print("5:", os.path.join('aaaa', 'bbbb', 'cccc', 'dddd', 'ccccc.txt'))
-   print("6:", os.path.join('aaaa', 'bbbb', 'cccc', 'dddd', ''))
-   输出结果为：
+  print("1:", os.path.join('aaaa', '/bbbb', 'ccccc.txt'))
+  print("2:", os.path.join('/aaaa', '/bbbb', '/ccccc.txt'))
+  print("3:", os.path.join('aaaa', 'bbbb', './cccc', 'ccccc.txt'))
+  print("4:", os.path.join('aaaa', 'bbbb', './cccc', '/dddd', 'ccccc.txt'))
+  print("5:", os.path.join('aaaa', 'bbbb', 'cccc', 'dddd', 'ccccc.txt'))
+  print("6:", os.path.join('aaaa', 'bbbb', 'cccc', 'dddd', ''))
+  输出结果为：
    1: /bbbb/ccccc.txt
    2: /ccccc.txt
    3: aaaa/bbbb/./cccc/ccccc.txt
@@ -101,7 +117,8 @@ b  4  5
 9.torch.matmul(input, other) → Tensor
   计算两个张量input和other的矩阵乘积
  【注意】：matmul函数没有强制规定维度和大小，可以用利用广播机制进行不同维度的相乘操作。
-10.如果将Matplotlib绘图和我们平常画画相类比，可以把Figure想象成一张纸（一般被称之为画布），Axes代表的则是纸中的一片区域，axis是轴。
+10.
+  如果将Matplotlib绘图和我们平常画画相类比，可以把Figure想象成一张纸（一般被称之为画布），Axes代表的则是纸中的一片区域，axis是轴。
   plt绘图：第一种方式的代码来看，先生成了一个Figure画布，然后在这个画布上隐式生成一个画图区域进行画图。
   plt.figure()
   plt.plot([1,2,3],[4,5,6])
@@ -142,7 +159,7 @@ b  4  5
   ax.axes.get_yaxis().set_visible(False)隐藏y坐标轴
 
   ax.flatten()是对多维数据的降维函数。
-  ax.flatten(),默认缺省参数为0，也就是说flatten()和flatte(0)效果一样。python里的flatten(dim)表示，从第dim个维度开始展开，
+  ax.flatten(),默认缺省参数为0，也就是说flatten()和flatten(0)效果一样。python里的flatten(dim)表示，从第dim个维度开始展开，
   将后面的维度转化为一维.也就是说，只保留dim之前的维度，其他维度的数据全都挤在dim这一维。
 11.
   画布参数plt.figure：
@@ -172,11 +189,8 @@ b  4  5
    A[b]:tensor([[1,2,3],[4,5,6]])，得到A矩阵的第零行和第一行
    A[c]:tensor([[4,5,6],[7,8,9]])
    A[d]:tensor([[1,2,3],[7,8,9]])，得到矩阵A的第零行和第二行
-13.with torch.no_grad():  表示所有计算得出的tensor的requires_grad都自动设置为False，反向传播时就不会自动求导了，
-   从而节省计算开支。
-14.data.TensorDataset() 以用来对tensor进行打包，就好像python中的zip功能。该类通过每一个tensor的
-   第一个维度进行索引。因此，该类中的 tensor 第一维度必须相等. 另外：TensorDataset 中的参数必须是 tensor.
-15.zip()函数用于将可迭代的对象作为参数，将对象中对应的元素打包成一个个元组，然后返回由这些元组组成的列表。
+13.with torch.no_grad():  表示所有计算得出的tensor的requires_grad都自动设置为False，反向传播时就不会自动求导了，从而节省计算开支。
+14.zip()函数用于将可迭代的对象作为参数，将对象中对应的元素打包成一个个元组，然后返回由这些元组组成的列表。
    如果各个迭代器的元素个数不一致，则返回列表长度与最短的对象相同，利用 * 号操作符，可以将元组解压为列表
    a = [1,2,3]
    b = [4,5,6,7,8]
@@ -184,11 +198,15 @@ b  4  5
 输出为：[(1, 4), (2, 5), (3, 6)]
    zip(*zipped)    # 与 zip 相反，*zipped 可理解为解压，返回二维矩阵式
 输出为：[(1, 2, 3), (4, 5, 6)]
-16.data.DataLoader()就是用来包装所使用的数据，把训练数据分成多个小组，每次抛出一批数据.
+15.data.TensorDataset() 以用来对tensor进行打包，就好像python中的zip功能。该类通过每一个tensor的第一个维度进行索引。
+   因此，该类中的 tensor 第一维度必须相等. 另外：TensorDataset 中的参数必须是 tensor.
+16.TensorDataset(tensor1,tensor2)-->[[tensor1，label1]，[tensor2,label2],...]
+   from torch.utils import data
    a = torch.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9], [1, 2, 3], [4, 5, 6], [7, 8, 9]])
    b = torch.tensor([44, 55, 66, 44, 55, 66, 44, 55, 66])
    # TensorDataset对tensor进行打包
-   train_ids = TensorDataset(a, b) 
+   train_ids = data.TensorDataset(a, b)
+   #打包后的列表里的每一个对象的形式为(tensor([4, 5, 6]), tensor(55))
    for x_train, y_label in train_ids:
       print(x_train, y_label)
 输出结果为：
@@ -202,10 +220,17 @@ tensor([1, 2, 3]) tensor(44)
 tensor([4, 5, 6]) tensor(55)
 tensor([7, 8, 9]) tensor(66)
 
-# dataloader进行数据封装,就是拿出批次大小的数据里面的内容就是dataset()后的形式一般是[(数据1，标签1)，(数据2，标签2),]
+17:data.DataLoader()就是用来包装所使用的数据，把训练数据分成多个小组，每次抛出一批数据.
+dataloader进行数据封装,就是拿出批次大小的数据，里面的内容类似于dataset()后的形式，batch_size=1时是[(数据1，标签1)，(数据2，标签2),]，
+batch_size=2时是[[tensor[数据1，数据2]，tensor[标签1，标签2]]，tensor[[数据3，数据4]，tensor[标签3，标签4]]]
+即一个对象(是个列表)里面包含batch_size个样本，数据又分为数据向量矩阵和标签向量矩阵
+[tensor([[4, 5, 6],
+        [4, 5, 6],
+        [1, 2, 3]]), tensor([55, 55, 44])]
 train_loader = DataLoader(dataset=train_ids, batch_size=3, shuffle=True)
 for i, data in enumerate(train_loader, 1):  
-# 注意enumerate返回值有两个,一个是序号，一个是数据（包含训练数据和标签）
+#enumerate(sequence,[start=0])，默认序号从0开始数，就比如这个指定了1，就从batch：1即从序号1开始数了，实际并不影响数据，仅仅只是计数而已。
+# 注意enumerate返回值有两个,一个是序号，一个是数据（包含训练数据和标签）。
     x_data, label = data
     print(' batch:{0} x_data:{1}  label: {2}'.format(i, x_data, label))
 输出结果为：
@@ -218,11 +243,28 @@ for i, data in enumerate(train_loader, 1):
  batch:3 x_data:tensor([[1, 2, 3],
         [7, 8, 9],
         [7, 8, 9]])  label: tensor([44, 66, 66])
-17.独热编码（one-hot encoding）,独热编码是一个向量，它的分量和类别一样多。 类别对应的分量设置为1，其他所有分量设置为0。
-18.交叉熵损失（cross-entropy loss），它是分类问题最常用的损失之一。交叉熵从P到Q，记为H(P,Q)。可以把交叉熵想象为“主观概率
+18.独热编码（one-hot encoding）,独热编码是一个向量，它的分量和类别一样多。 类别对应的分量设置为1，其他所有分量设置为0。
+19.交叉熵损失（cross-entropy loss），它是分类问题最常用的损失之一。交叉熵从P到Q，记为H(P,Q)。可以把交叉熵想象为“主观概率
    为Q的观察者在看到根据概率P生成的数据时的预期惊异”。当P=Q时，交叉熵达到最低。交叉熵是一个衡量两个概率分布之间差异的很好的度量，
    它测量给定模型编码数据所需的比特数。
-19.iter(object)用来生成迭代器，迭代器是一个可以记住遍历的位置的对象。object -- 支持迭代的集合对象。
+
+   公式：
+   先对每一个样本数据中的每一类别求 -(1类真实概率*log(1类预测概率)+2类真实概率*log(2类预测概率)+...)
+   然后对每一个样本计算出的结果求和再平均
+
+   sigmoid(softmax)+cross-entropy loss 擅长于学习类间的信息，因为它采用了类间竞争机制，它只关心对于正确标签预测概率的准确性，
+   忽略了其他非正确标签的差异，导致学习到的特征比较散。基于这个问题的优化有很多，比如对softmax进行改进，
+   如L-Softmax、SM-Softmax、AM-Softmax等
+   详情：https://www.zhihu.com/tardis/zm/art/35709485?source_id=1005
+20.iter(object)用来生成迭代器，迭代器是一个可以记住遍历的位置的对象。object -- 支持迭代的集合对象。
    一类是：list、tuple、dict、set、str。二类是：generator（都是Iterator对象），包含生成器和带yield的generator function
    生成器不但可以作用于for，还可以被next函数不断调用并且返回下一个值，可以被next函数不断调用返回下一个值的对象称为迭代器（Iterator）。
-20.next(iterator),iterator--可迭代的对象,iter()把目标转为可迭代的对象，然后通过next(iterator)访问每一个可迭代的对象。
+21.next(iterator),iterator--可迭代的对象,iter()把目标转为可迭代的对象，然后通过next(iterator)访问每一个可迭代的对象。
+22.view()相当于reshape、resize，重新调整Tensor的形状。
+   v1 = torch.range(1, 16) 
+   v2 = v1.view(4, 4)
+23.transforms.ToTensor()这是一个图像转换的操作，将图像从PIL(Python Imaging Library)格式转换为PyTorch的Tensor类型。
+   它还会将像素值的范围从[0, 255]缩放到[0, 1]。
+24.transforms.Compose()就是一个把几个对图像的操作连接成一个操作的函数。具体是对图像进行各种转换操作，并用函数compose将这些转换操作组合起来。
+   它其实是一个列表，按顺序记录着各种转换操作，也称为转换列表。
+25.

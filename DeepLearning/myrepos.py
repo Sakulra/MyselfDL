@@ -5,7 +5,7 @@ import torch
 from d2l import torch as d2l
 import matplotlib.pyplot as plt
 
-#############################使用循环和使用按元素相加运行时间对比
+################定义类Timer#############使用循环和使用按元素相加运行时间对比#############
 # n=10000
 # a=torch.ones(n)
 # b=torch.ones(n)
@@ -45,17 +45,17 @@ import matplotlib.pyplot as plt
 # timer.start()
 # d = a + b
 # print(f'{timer.stop():.5f} sec(秒)')
-##########################################不同方差和均值的正态分布可视化
-def normal(x,miu,sigma):
-    p=1/math.sqrt(2*math.pi*sigma**2)
-    return p*np.exp(-0.5/sigma**2*(x-miu)**2)
-x = np.arange(-7,7,0.01)
-params = [(0,1),(0,2),(3,1)]
+##########################################不同方差和均值的正态分布可视化####################
+# def normal(x,miu,sigma):
+#     p=1/math.sqrt(2*math.pi*sigma**2)
+#     return p*np.exp(-0.5/sigma**2*(x-miu)**2)
+# x = np.arange(-7,7,0.01)
+# params = [(0,1),(0,2),(3,1)]
 
-params = [(0, 1), (0, 2), (3, 1)]
-d2l.plot(x, [normal(x, miu, sigma) for miu, sigma in params], xlabel='x',
-         ylabel='p(x)', figsize=(4.5, 2.5),
-         legend=[f'mean {miu}, std {sigma}' for miu, sigma in params])
-plt.show()
-# plt.scatter()#绘制散点图
-####################################
+# params = [(0, 1), (0, 2), (3, 1)]
+# d2l.plot(x, [normal(x, miu, sigma) for miu, sigma in params], xlabel='x',
+#          ylabel='p(x)', figsize=(4.5, 2.5),
+#          legend=[f'mean {miu}, std {sigma}' for miu, sigma in params])
+# plt.show()
+# # plt.scatter()#绘制散点图
+#####################################################################
