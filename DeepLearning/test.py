@@ -46,7 +46,7 @@
 #     print(' batch:{0} x_data:{1}  label: {2}'.format(i, x_data, label))
 
 ###########################################
-import torch
+#import torch
 # a = torch.tensor([[1,2,3]],[4,5,6])
 # b = torch.tensor([1,2,3])
 # print(a+b)
@@ -58,8 +58,22 @@ import torch
 # y = x[rows,cols]
 # print (y)
 
-y_hat = torch.arange(6).reshape(2,3)
-print(y_hat)
-y = torch.tensor([0,2])
-print(range(len(y_hat)))
+# y_hat = torch.arange(6).reshape(2,3)
+# print(y_hat.shape)
+# y = torch.tensor([0,2])
+# print(range(len(y_hat)))
 # print (y_hat[range(len(y_hat)),y])
+
+# list1 = [1.0,2.0,3.0]
+# b = [1,2,3]
+# list1 = [i+j for i,j in zip(list1,b)]
+# print(list1)
+# list2 = [9,]
+# list2 = [i for i in b]
+# print(list2)
+#列表推导式原型不应该是这样的吗
+# list2 = []
+# for i,j in zip(list2,b):
+#     list2.append(i+j)
+# print(list2)
+##############################################################################

@@ -59,3 +59,20 @@ import matplotlib.pyplot as plt
 # plt.show()
 # # plt.scatter()#绘制散点图
 #####################################################################
+#定义一个实用程序类Accumulator，用于对多个变量进行累加
+# class Accumulator:
+#     """在n个变量上累加"""
+#     def __init__(self,n) -> None:#n是待累加的变量的个数
+#         self.data = [0.0]*n#有几个数，就把列表扩成相应大小,data 用于存储待累加的变量，如正确率、损失值，样例数等
+#         #如果不把data初始化为n个0就无法进行下一步的累加了，data列表是空的话，怎么让data的内容与传入的args的内容进行加法
+
+#     def add(self,*args):
+#         self.data = [a + float(b) for a,b in zip(self.data,args)]
+#         #对于index i 从data中取出a，从args中取出b，然后相加，结果放在data 的i索引位置
+
+#     def reset(self):
+#         self.data = [0.0]*len(self.data)
+
+#     def __getitem__(self,idx):
+#         return self.data[idx]
+#################################################################################

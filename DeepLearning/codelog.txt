@@ -148,6 +148,12 @@ b  4  5
   alpha → 散点透明度（[0, 1]之间的数，0表示完全透明，1则表示完全不透明）
   linewidths →散点的边缘线宽
   edgecolors → 散点的边缘颜色
+  xlim,ylim → 设置x轴和y轴的极限
+  fmt = '[marker][line][color]' 
+      https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
+       线型  '-'：实线  '--'：虚线  '-.'：点画线  ':'：点线
+       点型  
+       颜色
   详情：https://zhuanlan.zhihu.com/p/111331057
 
   ax = plt.gca() #获取当前坐标轴
@@ -267,4 +273,7 @@ for i, data in enumerate(train_loader, 1):
    它还会将像素值的范围从[0, 255]缩放到[0, 1]。
 24.transforms.Compose()就是一个把几个对图像的操作连接成一个操作的函数。具体是对图像进行各种转换操作，并用函数compose将这些转换操作组合起来。
    它其实是一个列表，按顺序记录着各种转换操作，也称为转换列表。
-25.
+25.torch.argmax(input，[dim]) → LongTensor。返回输入张量中指定维度所有元素的最大值的索引，不指定维度就是把矩阵展成一维向量，再返回索引。
+   实例https://zhuanlan.zhihu.com/p/409912530
+26.numel()函数：返回数组中元素的个数。y.numel()
+27
