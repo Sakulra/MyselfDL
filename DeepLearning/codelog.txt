@@ -36,6 +36,11 @@
 @7.batch_size其实越小对损失函数的收敛越有益，因为对于深度神经网络是很复杂的，当batch_size比较小的时候，
   在同一批次中噪音比例就会变大，而噪音对神经网络是有好处的，它可以增加算法鲁棒性
 @8.全连接层在Linear类中定义；计算均方误差使用的是MSELoss类；SGD(小批量随机梯度下降算法)在optim模块中实现；
+@9.损失函数和优化函数的联合过程：损失函数仅仅用来计算预测与真实之间的差距大小，而优化函数可以调整拟合函数从而使损失函数的值变小。
+   对于一个优化函数，要优化的是拟合函数中的某些变量，比如截距b，我们可以先初始化b为0，然后计算得到b=0时损失函数的具体值，
+   (横坐标的b，纵坐标是损失函数总值)通过对损失函数进行求导得到b=0时的斜率，然后对斜率乘以一个学习率，用b-lr*斜率，就可以得到一个新的b，
+   然后使用新的b，又可以计算得到一个具体的损失函数值，然后...   讲解https://www.bilibili.com/video/BV1XW421F7M4
+@10.当我们在一个对象上调用内置的len()函数时，实际上是在调用该对象的__len__()方法。这个方法的主要作用是返回一个对象的长度。
 2.矩阵a的截取：a[起始行：结束行，起始列：结束列]，如果只截取某2列为a[,1]，因为第二列的索引是1，
    a[2]只截取第三行
    还有a[起始行：结束行：间隔行，起始列：结束列：间隔列],如a[::3,::2]，从第零行开始，每三行一跳，每两列一跳.
@@ -117,7 +122,10 @@ b  4  5
 9.torch.matmul(input, other) → Tensor
   计算两个张量input和other的矩阵乘积
  【注意】：matmul函数没有强制规定维度和大小，可以用利用广播机制进行不同维度的相乘操作。
-10.
+10.matplotlib允许我们将一个figure通过栅格系统划分成不同的格子，然后在格子中画图，这样就可以在一个figure中画多个图了。
+  这里的每个格子有两个名称：Axes和subplot。subplot是从figure所有的格子来看的。因为figure要统一管理协调这些格子的位置、
+  间隔等属性，管理协调的方法和属性设置就在subplots的层面进行。Axes是从作为画图者的我们的角度来定义的，我们要画的点、线等
+  都在Axes这个层面来进行。画图用的坐标系统自然也是在Axes中来设置的。
   如果将Matplotlib绘图和我们平常画画相类比，可以把Figure想象成一张纸（一般被称之为画布），Axes代表的则是纸中的一片区域，axis是轴。
   plt绘图：第一种方式的代码来看，先生成了一个Figure画布，然后在这个画布上隐式生成一个画图区域进行画图。
   plt.figure()
@@ -185,8 +193,10 @@ b  4  5
   plt.plot(x,y)对第二个子图进行绘画
 
   fig, axs = plt.subplots(2, 2)
-  axs[0][0].plot(x, y)对第一个子图进行绘画
-  axs[1][1].scatter(x, y)对第四个子图进行绘画
+  axs[0]代表的就是第一行两个子区域
+  axs[0][0].plot(x, y) 或 axs[0,0]  对第一个子图进行绘画
+  axs[0,1].plot(x,y) 对第二个子图进行绘画
+  axs[1][1].scatter(x, y) 或 axs[1,1].scatter(x,y) 对第四个子图进行绘画
   不想用axs[,]可以
   f, ([ax1, ax2],[ax3,ax4]) = plt.subplots(2, 2, sharex=True)
   直接指定每一块区域的名字，然后直接用ax1，ax2，ax3，ax4来指定操作区域即可
@@ -273,7 +283,72 @@ for i, data in enumerate(train_loader, 1):
    它还会将像素值的范围从[0, 255]缩放到[0, 1]。
 24.transforms.Compose()就是一个把几个对图像的操作连接成一个操作的函数。具体是对图像进行各种转换操作，并用函数compose将这些转换操作组合起来。
    它其实是一个列表，按顺序记录着各种转换操作，也称为转换列表。
-25.torch.argmax(input，[dim]) → LongTensor。返回输入张量中指定维度所有元素的最大值的索引，不指定维度就是把矩阵展成一维向量，再返回索引。
+25.torch.argmax(input，[dim]) → LongTensor。返回输入张量中指定维度所有元素的最大值的索引，并组成一维向量tensor([1,2,0,1,])，可以看成行向量。
+   不指定维度就是把矩阵展成一维向量，再返回索引。
    实例https://zhuanlan.zhihu.com/p/409912530
 26.numel()函数：返回数组中元素的个数。y.numel()
-27
+27.plt.draw()函数的作用是重新绘制当前图形。要更新图，需要清除现有图形可以使用 matplotlib.pyplot.clf() 和 matplotlib.axes.Axes.clear()。
+   如果在修改图形的过程中使用了plt.show()函数，则plt.draw()函数将失效。因此，一般情况下应该先调用plt.draw()函数，然后再使用plt.show()函数。
+   plt.show()将显示您正在处理的当前图形。
+28.ipython中display模块中的display函数它可以显示文本、图像、音频和视频等。
+   from IPython.display import display,Image，Audio, Video
+   显示图像：display(Image(filename='image.png'))
+   显示视频：display(Video(filename='video.mp4'))
+   显示音频：display(Audio(filename='audio.mp3'))
+29.np.linspace(start,stop,num,[endpoint],[dtype]),起始值，终值，生成个数。生成结果第一个就是起始值，最后一个就是终值，其余数在它们之间等间隔取。
+   可选参数endpoint决定输出结果包不包含终值，dtype决定输出数的类型。
+   从0 到 100，间隔为10的数值序列：np.linspace(start = 0, stop = 100, num = 11)
+   输出array([  0.,  10.,  20.,  30.,  40.,  50.,  60.,  70.,  80.,  90., 100.])
+30.lambda函数的语法只包含一个语句lambda[arg1 [,arg2,.....argn]]:expression。[arg…] 和 expression 由用户自定义。
+   expression是一个参数表达式，表达式中出现的参数需要在[arg......]中有定义，并且表达式只能是单行的，只能有一个表达式。
+   特性：
+   lambda 函数是匿名的，通俗地说就是没有名字的函数。lambda函数没有名字。
+   lambda 函数有输入和输出：输入是传入到参数列表argument_list的值，输出是根据表达式expression计算得到的值。
+   lambda 函数拥有自己的命名空间：不能访问自己参数列表之外或全局命名空间里的参数，只能完成非常简单的功能。
+   用法1：将lambda函数赋值给一个变量，通过这个变量间接调用该lambda函数。
+   add = lambda x, y: x+y  相当于定义了加法函数lambda x, y: x+y，并将其赋值给变量add，这样变量add就指向了具有加法功能的函数。
+   这时我们如果执行add(1, 2)，其输出结果就为 3。
+   用法2：将lambda函数赋值给其他函数，从而将其他函数用该lambda函数替换。
+   time.sleep=lambda x: None   #把标准库time中的函数sleep的功能屏蔽
+   time.sleep(3)	# 程序不会休眠 3 秒钟，而是因为lambda输出为None，所以这里结果是什么都不做
+31.map(function, iterable, ...)函数：将可迭代对象中的每一个对象调用function函数，然后返回所有function函数输出结果的迭代器(新列表)。
+   def square(x):
+	   return x ** 2
+   map(square, [1,2,3,4,5])
+   输出[1, 4, 9, 16, 25]
+   也可改为lambda匿名函数写法：
+   map(lambda x: x ** 2, [1, 2, 3, 4, 5])
+   提供两个列表，将其相同索引位置的列表元素进行相加：map(lambda x, y: x + y, [1, 3, 5, 7, 9], [2, 4, 6, 8, 10])
+32.reduce(function, iterable[, initializer])函数会对参数序列(可迭代对象)中的元素进行累积。
+   函数将一个数据集合（链表，元组等）中的所有数据进行下列操作：用传给 reduce 中的函数 function（有两个参数）
+   先对集合中的第 1、2 个元素进行操作，得到的结果再与第三个元素用 function 函数运算，最后得到一个结果。
+   from functools import reduce
+   def add(x, y):            
+	   return x + y
+   reduce(add, [1, 3, 5, 7, 9])    # 计算列表元素和：1+3+5+7+9
+   输出25
+   也可改成lambda写法：
+   reduce(lambda x, y: x + y, [1, 2, 3, 4, 5])
+   当要把序列 [1, 3, 5, 7, 9] 变换成整数 13579，reduce就很好用：
+   from functools import reduce
+   def fn(x, y):
+	   return x * 10 + y
+   reduce(fn, [1, 3, 5, 7, 9])
+   输出13579
+33.sorted(iterable, key=None, reverse=False)
+   sort和sorted的区别：sort是list的一个方法，而sorted可以对所有可迭代的对象进行排序操作。
+   list 的 sort 方法返回的是对已经存在的列表进行操作，无返回值，而内建函数sorted方法返回的是一个新的list，而不是在原来的基础上进行的操作。
+   key：用来进行比较的元素，只有一个参数，参数取自可迭代对象
+   reverse：是排序规则，reverse = True 降序 ， reverse = False 升序（默认）
+   L=[('b',2),('a',1),('c',3),('d',4)]
+   sorted(L, key=lambda x:x[1])
+   输出[('a', 1), ('b', 2), ('c', 3), ('d', 4)]
+34.filter(function, iterable)用于过滤序列，过滤掉不符合条件的元素，返回由符合条件元素组成的新列表。该接收两个参数，
+   第一个为函数，第二个为序列，序列的每个元素作为参数传递给函数进行判，然后返回 True 或 False，最后将返回 True 的元素放到新列表中。
+   newlist = filter(lambda x: x % 3 == 0, [1, 2, 3])
+   print(list(newlist)) 输出[3]
+35.hasattr(object, name)object --> 对象；name --> 字符串，属性名。
+   用于判断对象是否包含对应的属性
+36.assert expression,'自定义报错语句'，在表达式条件为false时触发异常。在条件不满足程序运行条件时直接返回错误，而不必等待程序运行后出现崩溃的情况.
+   它主要是用来检测调试你的代码问题，当你使用 assert 来检测你的代码的时候，如果是 True ，它就会直接通过，
+   当它是 False 的时候，就会抛出错误，然后你就可以根据错误进行定位，从而在具体的位置修改代码。

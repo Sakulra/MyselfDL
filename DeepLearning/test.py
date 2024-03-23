@@ -1,6 +1,7 @@
 # import d2l
 # import numpy as np
 # import pandas as pd
+# import torch
 
 # a=pd.DataFrame(np.arange(9).reshape(3,-1),index=['a','b','c'],columns=['A','B','C'])
 
@@ -59,7 +60,7 @@
 # print (y)
 
 # y_hat = torch.arange(6).reshape(2,3)
-# print(y_hat.shape)
+# print(y_hat)
 # y = torch.tensor([0,2])
 # print(range(len(y_hat)))
 # print (y_hat[range(len(y_hat)),y])
@@ -77,3 +78,12 @@
 #     list2.append(i+j)
 # print(list2)
 ##############################################################################
+# a = torch.tensor([1,2,3])
+# b = torch.tensor([1,1,1])
+# cmp = a==b
+# print(cmp)
+
+from matplotlib import pyplot as plt
+
+fig,axes = plt.subplots(2,2,figsize=(3.5,2.5))
+print(axes[0])

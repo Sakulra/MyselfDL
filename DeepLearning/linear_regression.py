@@ -80,7 +80,7 @@ for epoch in range(num_epoch):
         l = loss(net(X,w,b),y) #X和y的小批量损失
         # 因为l形状是(batch_size,1)，而不是一个标量。l中的所有元素被加到一起，
         # 并以此计算关于[w,b]的梯度
-        l.sum().backward()#backward只有对标量输出时才会计算梯度，而无法对张量计算梯度
+        l.sum().backward()#backward一般对标量进行计算梯度，很少对向量计算梯度，因为对一维向量求导就会变成一个矩阵，越求导越复杂
         sgd([w,b],lr,batch_size)
         with torch.no_grad():
             train_l = loss(net(features,w,b),labels)#X和y的整体损失
