@@ -5,7 +5,7 @@ from d2l import torch as d2l
 batch_size = 256
 train_iter,test_iter = d2l.load_data_fashion_mnist(batch_size)
 
-#将28x28的矩阵压成184的行向量，这样仅考虑了位置关系，未考虑空间结构特征
+#将28x28的矩阵压成784的行向量，这样仅考虑了位置关系，未考虑空间结构特征
 #初始化模型参数,权重用正态分布初始化，偏置b是1x10的行向量。
 #w每个类别的权重占一列，每一列包含784个权重参数，共10类，所以是784x10。
 num_inputs = 784
@@ -32,7 +32,8 @@ def softmax(X):
 #定义模型
 def net(X):
     """将输入与权重相乘再加上偏置后进行softmax化"""
-    #x如果是一张图片的话正好，x乘完w后就是个行向量,刚好和b同形状。w.shape[0]是784
+    #X共有batch_size行也就是256行，每一行代表一张图片
+    #x每一行乘完w后就是个行向量,刚好和b同形状。w.shape[0]是784，这里之所以能和b相加时利用了广播原理
     return softmax(torch.matmul(X.reshape((-1,w.shape[0])),w)+b)
 
 #定义损失函数
@@ -107,7 +108,7 @@ class Accumulator:
 
 #训练，即训练的核心部分，包括损失函数，优化函数
 def train_epoch_ch3(net:'function',train_iter,loss:'function',updater:'function'):
-    """训练模型一个迭代周期"""
+    """训练模型一个迭代周期,返回预测正确率和预测错误率"""
     #将模型设置为训练模式
     if isinstance(net,torch.nn.Module):
         net.train()#告诉pytorch要计算梯度
@@ -158,7 +159,7 @@ class Animator:
             axes=self.axes[0], xlabel=xlabel, ylabel=ylabel, xlim=xlim, ylim=ylim, xscale=xscale, yscale=yscale, legend=legend)
         self.X,self.Y,self.fmts = None,None,fmts#X,Y是矩阵
 
-    def add(self,x,y):
+    def add(self,x,y):#x,y存储的时本批次的值，X,Y存储的是到目前为止所有批次的值
         #像列表中添加多个数据点
         # 判断y是否包含可迭代的对象，若不是，则将其转换为一个只包含单个元素的列表
         if not hasattr(y,"__len__"):
@@ -197,11 +198,11 @@ def train_ch3(net, train_iter, test_iter, loss, num_epochs, updater):
                         legend=['train loss','train acc','test acc'])
     for epoch in range(num_epochs):
         #train_epoch_ch3：训练模型，返回准确度和错误度
-        train_metrics = train_epoch_ch3(net,train_iter,loss,updater)
+        train_metrics = train_epoch_ch3(net,train_iter,loss,updater)#训练一次后net()中的w和b参数已经发生改变
         #在测试数据集上评估精度
         test_acc = evaluate_accuracy(net,test_iter)
-        animator.add(epoch+1,train_metrics+(test_acc,))
-    train_loss,train_acc = train_metrics
+        animator.add(epoch+1,train_metrics+(test_acc,))#y包含三个参数，有train_metrics的预测正确率，预测错误率，再加上test_acc
+    train_loss,train_acc = train_metrics#这个train_loss和loss和训练中的loss函数不是一个
     # assert断言函数是对表达式布尔值的判断，要求表达式计算值必须为真。可用于自动调试。如果表达式为假，触发异常；如果表达式为真，不执行任何操作。
     assert train_loss < 0.5,train_loss
     assert train_acc <= 1 and train_acc > 0.7,train_acc
@@ -223,9 +224,10 @@ def predict_ch3(net, test_iter, n=6):
     """预测标签"""
     for X,y in test_iter:
         break
-    trues = d2l.get_fashion_mnist_labels(y)
+    trues = d2l.get_fashion_mnist_labels(y)#已经从索引转化为名字了
     preds = d2l.get_fashion_mnist_labels(net(X).argmax(axis=1))
     titles = [true +'\n' + pred for true,pred in zip(trues,preds)]
+    #print(X.shape)
     d2l.show_images(
         X[0:n].reshape((n,28,28)),1,n,titles=titles[0:n]
     )

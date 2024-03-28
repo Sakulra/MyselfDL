@@ -83,7 +83,12 @@
 # cmp = a==b
 # print(cmp)
 
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 
-fig,axes = plt.subplots(2,2,figsize=(3.5,2.5))
-print(axes[0])
+# fig,axes = plt.subplots(2,2,figsize=(3.5,2.5))
+# print(axes[0])
+
+import torch
+a=torch.tensor([[1,2,3],[4,5,6]])
+b=torch.tensor([1,1,1])
+print(a+b)
