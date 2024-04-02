@@ -46,7 +46,7 @@
 #     x_data, label = data
 #     print(' batch:{0} x_data:{1}  label: {2}'.format(i, x_data, label))
 
-###########################################
+#######################################################################################3
 #import torch
 # a = torch.tensor([[1,2,3]],[4,5,6])
 # b = torch.tensor([1,2,3])
@@ -87,8 +87,46 @@
 
 # fig,axes = plt.subplots(2,2,figsize=(3.5,2.5))
 # print(axes[0])
-
+#####################################################################################3
 import torch
-a=torch.tensor([[1,2,3],[4,5,6]])
-b=torch.tensor([1,1,1])
-print(a+b)
+from torch import nn
+# a=torch.tensor([[1,2,3],[4,5,6]])
+# b=torch.tensor([1,1,1])
+# print(a+b)
+
+# w = torch.empty(3, 5)
+# print(w)
+# print('.'*10)
+# print(nn.init.normal_(w))
+###########################################动态画图##############################################3
+import matplotlib.pyplot as plt
+# import math
+# i=0
+# x=[]
+# y1=[]
+# y2=[] # 要绘制的是（x,y1）和（x,y2）
+# # subplot(在窗口中分的行、列、画图序列数)
+# while (i<100):
+#     plt.clf()  # 清除之前画的图
+#     # subplot(在窗口中分的行、列、画图序列数)
+#     plt.subplot(211) #第1个图画在一个两行一列分割图的第1幅位置
+#     x.append(i)
+#     y1.append(i**2)
+#     plt.plot(x,y1)
+#     plt.subplot(212) #第2个图画在一个两行一列分割图的第2幅位置
+#     y2.append(math.sqrt(i))
+#     plt.plot(x,y2)
+#     plt.pause(0.01)  # 暂停0.1秒
+#     plt.ioff()  # 关闭画图的窗口
+#     i=i+1
+
+x=[]
+y=[]
+i=0
+while i<=100:
+    x.append(i)
+    y.append(i**2)
+    plt.plot(x,y)
+    plt.draw()
+    i=i+1
+    plt.pause(0.1)

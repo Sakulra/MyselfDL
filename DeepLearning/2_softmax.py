@@ -134,8 +134,8 @@ def train_epoch_ch3(net:'function',train_iter,loss:'function',updater:'function'
             #metric.add(float(l.sum()), accuracy(y_hat, y), y.numel())
         metric.add(float(l.sum()),accuracy(y_hat,y),y.numel())#metric.add()其实是可以分情况分为上面两种，合起来的话就是这句。
     #返回训练损失和训练精度
-    #metric[0]:分类正确的样本数，metric[1]:总的样本数
-    return metric[0] / metric[2],metric[1] / metric[2]
+    #metric=[损失函数总和，正确预测总数，总预测数]
+    return metric[0] / metric[2],metric[1] / metric[2]#返回平均损失函数，预测正确率
 
 #定义一个在动画中绘制数据的实用程序类Animator，它可以动态显示结果
 class Animator:
@@ -184,8 +184,10 @@ class Animator:
         self.config_axes()#对第一个区域画布进行设置参数
         display.display(self.fig)
 
+        
         d2l.plt.draw()
         d2l.plt.pause(0.01)
+        #d2l.plt.ioff()  # 关闭画图的窗口
 
         display.clear_output(wait=True)
 

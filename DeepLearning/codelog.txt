@@ -44,6 +44,7 @@
 @11.model.zero_grad()的作用是将所有模型参数的梯度置为0。
    optimizer.zero_grad()的作用是清除所有可训练的torch.Tensor的梯度。
    zero_grad()清除梯度
+@12.于对抗过拟合的技术称为正则化（regularization）
 2.矩阵a的截取：a[起始行：结束行，起始列：结束列]，如果只截取某2列为a[,1]，因为第二列的索引是1，
    a[2]只截取第三行
    还有a[起始行：结束行：间隔行，起始列：结束列：间隔列],如a[::3,::2]，从第零行开始，每三行一跳，每两列一跳.
@@ -184,6 +185,9 @@ b  4  5
   画布参数plt.figure：
   fig=plt.figure(figsize=(4,3),facecolor='blue')  # 4*3 英寸，蓝色背景
 
+  plt.ioff()  # 关闭画图的窗口
+  plt.cla  #清除上一幅图像
+
   图例注释plt.legend()让标签显示出来：
   plt.legend(loc=3) #写3和'lower left'都可以
 
@@ -292,7 +296,7 @@ for i, data in enumerate(train_loader, 1):
    不指定维度就是把矩阵展成一维向量，再返回索引。
    实例https://zhuanlan.zhihu.com/p/409912530
 27.numel()函数：返回数组中元素的个数。y.numel()
-28.plt.draw()函数的作用是重新绘制当前图形。要更新图，需要清除现有图形可以使用 matplotlib.pyplot.clf() 和 matplotlib.axes.Axes.clear()。
+28.plt.draw()函数的作用是重新绘制当前图形。如果需要清除现有图形可以使用 matplotlib.pyplot.clf() 和 matplotlib.axes.Axes.clear()。
    如果在修改图形的过程中使用了plt.show()函数，则plt.draw()函数将失效。因此，一般情况下应该先调用plt.draw()函数，然后再使用plt.show()函数。
    plt.show()将显示您正在处理的当前图形。
 29.ipython中display模块中的display函数它可以显示文本、图像、音频和视频等。
@@ -398,4 +402,22 @@ for i, data in enumerate(train_loader, 1):
 45.net.apply(),pytorch的任何网络net，都是torch.nn.Module的子类,都算是module。pytorch中的model.apply(fn)会递归地将函数fn应用到
    父模块的每个子模块submodule，也包括model这个父模块自身。如果要对某些特定的子模块submodule做一些针对性的处理，
    可以加入type(m) == nn.Linear:这类判断语句，从而对子模块m进行处理。看源代码。
-46.
+46.torch.nn.CrossEntropyLoss(weight=None, reduction='mean', label_smoothing=0.0)
+   weight(Tensor, optional)：如果输入这个参数的话必须是一个1维的tensor，长度为类别数C，每个值对应每一类的权重.
+   reduction (string, optional) ：指定最终的输出类型，有'none','mean'输出结果平均值,'sum'输出结果求和,默认为'mean'。
+   输入的input必须是原始数据，不能是经过softmax或者normalized或者one—hot编码,原因是这个函数会首先对输入的原始得分进行softmax.
+   输入的target也就是label也不能是one-hot编码，必须直接是原本的类比如[5,3,1,1,0]，这五个样本分别对应其类。
+   注意写的过程中不能直接写loss = nn.CrossEntropyLoss(x_input, x_target)，必须要像下面那样先把求交叉熵的库函数定义到一个自己命名的函数再调用，
+   否则会报错。RuntimeError: bool value of Tensor with more than one value is ambiguous。
+   loss_fn = nn.CrossEntropyLoss()
+   x_input = torch.randn(2, 3)
+   x_target = torch.tensor([0, 2])
+   loss = loss_fn(x_input, x_target)
+47.torch.optim.SGD(params, lr=<required parameter>, momentum=0, dampening=0, weight_decay=0, nesterov=False)
+   params（必须参数）: 这是一个包含了需要优化的参数（张量）的迭代器，例如模型的参数 model.parameters()。
+   momentum（默认值为 0）: 动量（momentum）是一个用于加速 SGD 收敛的参数。它引入了上一步梯度的指数加权平均。通常设置在 0 到 1 之间。
+                         当 momentum 大于 0 时，算法在更新时会考虑之前的梯度，有助于加速收敛。
+   dampening（默认值为 0）: 阻尼项，用于减缓动量的速度。在某些情况下，为了防止动量项引起的震荡，可以设置一个小的 dampening 值。
+   weight_decay（默认值为 0）: 权重衰减，也称为 L2 正则化项。它用于控制参数的幅度，以防止过拟合。通常设置为一个小的正数。
+   nesterov（默认值为 False）: Nesterov 动量。当设置为 True 时，采用 Nesterov 动量更新规则。Nesterov 动量在梯度更新之前先进行一次预测，然后在计算梯度更新时使用这个预测。
+   
