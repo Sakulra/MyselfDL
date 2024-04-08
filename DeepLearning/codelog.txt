@@ -45,6 +45,11 @@
    optimizer.zero_grad()的作用是清除所有可训练的torch.Tensor的梯度。
    zero_grad()清除梯度
 @12.于对抗过拟合的技术称为正则化（regularization）
+@13.影响模型泛化的因素:
+   1. 可调整参数的数量。当可调整参数的数量（有时称为自由度）很大时，模型往往更容易过拟合
+   2. 参数采用的值。当权重的取值范围较大时，模型可能更容易过拟合。
+   3. 训练样本的数量。即使模型很简单，也很容易过拟合只包含一两个样本的数据集。
+@14.自定义网络时class类里面的forward函数有什么用？
 2.矩阵a的截取：a[起始行：结束行，起始列：结束列]，如果只截取某2列为a[,1]，因为第二列的索引是1，
    a[2]只截取第三行
    还有a[起始行：结束行：间隔行，起始列：结束列：间隔列],如a[::3,::2]，从第零行开始，每三行一跳，每两列一跳.
@@ -123,9 +128,15 @@ b  4  5
 8.torch.noraml(means, std, out=None)返回一个张量，包含从给定参数means,std的离散正态分布中抽取随机数。 
   均值means是一个张量，包含每个输出元素相关的正态分布的均值。 std是一个张量，
   包含每个输出元素相关的正态分布的标准差。 均值和标准差的形状不须匹配，但每个张量的元素个数须相同。
-9.torch.matmul(input, other) → Tensor
-  计算两个张量input和other的矩阵乘积
- 【注意】：matmul函数没有强制规定维度和大小，可以用利用广播机制进行不同维度的相乘操作。
+9.矩阵运算@，*，tensor.dot()，torch.mul()，torch.mm()，torch.mv()，tensor.t()，torch.matmul()
+  @表示常规的数学上定义的矩阵相乘
+  *表示两个矩阵对应位置处的两个元素相乘
+  torc.dot(x,y): x和y对应位置相乘最后相加,x，y均为一维向量，和np.dot()不同，不能是多维矩阵，
+  torch.mul()等同*:表示相同shape矩阵点乘，即对应位置相乘，得到矩阵有相同的shape，可用广播机制。
+  torch.mm(a, b)等同@：正常矩阵相乘，要求a的列数与b的行数相同。
+  torch.mv(X, w0):矩阵和向量相乘.第一个参数是矩阵，第二个参数只能是一维向量,等价于X乘以w0的转置
+  Y.t():矩阵Y的转置。
+  torch.matmul(input, other) → Tensor，计算两个张量input和other的矩阵乘积，可利用广播机制进行不同维度的相乘操作。
 10.tensor.detach()返回一个新的tensor，从当前计算图中分离下来的，但是仍指向原变量的存放位置,
    不同之处只是requires_grad为false，得到的这个tensor永远不需要计算其梯度，不具有grad。
 11.matplotlib允许我们将一个figure通过栅格系统划分成不同的格子，然后在格子中画图，这样就可以在一个figure中画多个图了。
@@ -402,6 +413,7 @@ for i, data in enumerate(train_loader, 1):
 45.net.apply(),pytorch的任何网络net，都是torch.nn.Module的子类,都算是module。pytorch中的model.apply(fn)会递归地将函数fn应用到
    父模块的每个子模块submodule，也包括model这个父模块自身。如果要对某些特定的子模块submodule做一些针对性的处理，
    可以加入type(m) == nn.Linear:这类判断语句，从而对子模块m进行处理。看源代码。
+
 46.torch.nn.CrossEntropyLoss(weight=None, reduction='mean', label_smoothing=0.0)
    weight(Tensor, optional)：如果输入这个参数的话必须是一个1维的tensor，长度为类别数C，每个值对应每一类的权重.
    reduction (string, optional) ：指定最终的输出类型，有'none','mean'输出结果平均值,'sum'输出结果求和,默认为'mean'。
@@ -420,4 +432,18 @@ for i, data in enumerate(train_loader, 1):
    dampening（默认值为 0）: 阻尼项，用于减缓动量的速度。在某些情况下，为了防止动量项引起的震荡，可以设置一个小的 dampening 值。
    weight_decay（默认值为 0）: 权重衰减，也称为 L2 正则化项。它用于控制参数的幅度，以防止过拟合。通常设置为一个小的正数。
    nesterov（默认值为 False）: Nesterov 动量。当设置为 True 时，采用 Nesterov 动量更新规则。Nesterov 动量在梯度更新之前先进行一次预测，然后在计算梯度更新时使用这个预测。
-   
+48.model.parameters()返回每层网络的权重和偏置，但是直接print是不会显示内容的，而是一段地址，需要将迭代器转化为列表显示。
+   print(list(net.parameters()))
+49.numpy.power(x,y)其中的x和y都可以包含多个数据，比如列表，但是前后个数得对应，它会按相同索引位置进行x的y次方运算
+   numpy.power([1,2,3],[2,2,2])
+   输出[1,4,9]
+   当对矩阵进行运算时，会拿x矩阵的第一行依次进行y中数的次方，然后再拿x矩阵的第二行依次进行y中数的次方
+   x=[[1],[2],[3],[4]]
+   print(np.power(x,np.arange(3)))
+   得到
+   [[ 1  1  1]  #1的0，1，2次方
+    [ 1  2  4]  #2的0，1，2次方
+    [ 1  3  9]  #3的0，1，2次方
+    [ 1  4 16]] #4的0，1，2次方
+50.math.gamma(n)=(n-1)!注意是计算传入值n的n-1的阶乘
+51.

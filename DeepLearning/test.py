@@ -22,7 +22,7 @@
 # index=torch.tensor([0,2])
 # a=torch.tensor([[1,2,3],[4,5,6],[7,8,9]])
 # print(a[index])
-##################################################################################################
+##################################数据集封装和打包################################################################
 # from torch.utils import data
 # import torch
 
@@ -88,8 +88,9 @@
 # fig,axes = plt.subplots(2,2,figsize=(3.5,2.5))
 # print(axes[0])
 #####################################################################################3
-import torch
-from torch import nn
+# import torch
+# from torch import nn
+
 # a=torch.tensor([[1,2,3],[4,5,6]])
 # b=torch.tensor([1,1,1])
 # print(a+b)
@@ -99,7 +100,7 @@ from torch import nn
 # print('.'*10)
 # print(nn.init.normal_(w))
 ###########################################动态画图##############################################3
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 # import math
 # i=0
 # x=[]
@@ -120,13 +121,65 @@ import matplotlib.pyplot as plt
 #     plt.ioff()  # 关闭画图的窗口
 #     i=i+1
 
-x=[]
-y=[]
-i=0
-while i<=100:
-    x.append(i)
-    y.append(i**2)
-    plt.plot(x,y)
-    plt.draw()
-    i=i+1
-    plt.pause(0.1)
+# x=[]
+# y=[]
+# i=0
+# while i<=100:
+#     x.append(i)
+#     y.append(i**2)
+#     plt.plot(x,y)
+#     plt.draw()
+#     i=i+1
+#     plt.pause(0.1)
+################################自定义网络######################################################
+# import torch
+# import torch.nn as nn
+
+# # 在torch中，只会处理2维的数据
+# x = torch.unsqueeze(torch.linspace(-1, 1, 100), dim=1)
+# # x.pow(2)的意思是x的平方
+# y = x.pow(2) + 0.2 * torch.rand(x.size())
+
+
+# class Net(torch.nn.Module):  # 继承torch的module
+#     def __init__(self, n_feature, n_hidden, n_output):
+#         super(Net, self).__init__()  # 继承__init__功能
+#         # 定义每一层用什么样的样式
+#         self.hidden1 = torch.nn.Linear(n_feature, n_hidden,bias= 1)  # 隐藏层线性输出
+#         self.hidden2 = torch.nn.Linear(n_hidden, n_hidden,bias=1)  # 隐藏层线性输出
+#         self.predict = torch.nn.Linear(n_hidden, n_output,bias=0)  # 输出层线性输出
+
+#     def forward(self, x):
+#         # 激励函数（隐藏层的线性值）
+#         x = torch.relu(self.hidden1(x))
+#         x = torch.relu(self.hidden2(x))
+#         x = self.predict(x)  # 输出值
+#         return x
+
+
+# net = Net(2, 5, 3)
+# print(net)
+# print(net.parameters())
+# paras = list(net.parameters())
+# for num,para in enumerate(paras):
+#     print('number:',num)
+#     print(para)
+#     print('_________________________________________')
+#############################################矩阵花样次方###################################################
+# import numpy as np
+
+# x=[[1],[2],[3],[4]]
+# idx=[2,2]
+# print(np.power(x,np.arange(3).reshape(1,-1)))
+
+######################################################向量到底是行还是列#######################
+import torch
+matrix = torch.arange(12).reshape(3,4)
+b = torch.tensor([1,2,3,4])
+c = torch.tensor([[1],[2],[3],[4]])
+print(matrix)
+print(b)
+print(torch.mv(matrix,b))
+print('*'*10)
+print(c)
+print(torch.mm(matrix,c))
