@@ -106,37 +106,6 @@ class Accumulator:
     def __getitem__(self,idx):
         return self.data[idx]
 
-#训练，即训练的核心部分，包括损失函数，优化函数
-def train_epoch_ch3(net:'function',train_iter,loss:'function',updater:'function'):
-    """训练模型一个迭代周期,返回预测正确率和预测错误率"""
-    #将模型设置为训练模式
-    if isinstance(net,torch.nn.Module):
-        net.train()#告诉pytorch要计算梯度
-
-    #训练损失总和，训练准确度总和，样本数
-    metric = Accumulator(3)#metric=[损失函数总和，正确预测总数，总预测数]
-
-    for X,y in train_iter:
-        #计算梯度并更新参数
-        y_hat = net(X)
-        l = loss(y_hat,y)#在这里loss就是cross_entropy()这个函数
-        if isinstance(updater,torch.optim.Optimizer):
-            #使用pytorch内置的优化器和损失函数
-            updater.zero_grad()#先把梯度设置为零
-            l.mean().backward()#计算梯度
-            updater.step()#自更新
-            #metric.add(float(l) * len(y), accuracy(y_hat, y),y.size().numel())
-        else:
-            #使用定制的优化器和损失函数
-            l.sum().backward()
-            updater(X.shape[0])
-            # 如果是自我实现的话，l出来是向量，我们先做求和，再求梯度,梯度清零已经包含在自我实现的优化函数里了
-            #metric.add(float(l.sum()), accuracy(y_hat, y), y.numel())
-        metric.add(float(l.sum()),accuracy(y_hat,y),y.numel())#metric.add()其实是可以分情况分为上面两种，合起来的话就是这句。
-    #返回训练损失和训练精度
-    #metric=[损失函数总和，正确预测总数，总预测数]
-    return metric[0] / metric[2],metric[1] / metric[2]#返回平均损失函数，预测正确率
-
 #定义一个在动画中绘制数据的实用程序类Animator，它可以动态显示结果
 class Animator:
     """只有一个画图区域。在动画中绘制数据,参数为xlabel;ylabel;legend;xlim:'limit of axis x'=None;ylim:'limit of axis y'=None;
@@ -190,6 +159,37 @@ class Animator:
         #d2l.plt.ioff()  # 关闭画图的窗口
 
         display.clear_output(wait=True)
+
+#训练，即训练的核心部分，包括损失函数，优化函数
+def train_epoch_ch3(net:'function',train_iter,loss:'function',updater:'function'):
+    """训练模型一个迭代周期,返回预测正确率和预测错误率"""
+    #将模型设置为训练模式
+    if isinstance(net,torch.nn.Module):
+        net.train()#告诉pytorch要计算梯度
+
+    #训练损失总和，训练准确度总和，样本数
+    metric = Accumulator(3)#metric=[损失函数总和，正确预测总数，总预测数]
+
+    for X,y in train_iter:
+        #计算梯度并更新参数
+        y_hat = net(X)
+        l = loss(y_hat,y)#在这里loss就是cross_entropy()这个函数
+        if isinstance(updater,torch.optim.Optimizer):#这个是使用api采用的基本格式
+            #使用pytorch内置的优化器和损失函数
+            updater.zero_grad()#先把梯度设置为零
+            l.mean().backward()#计算梯度
+            updater.step()#自更新
+            #metric.add(float(l) * len(y), accuracy(y_hat, y),y.size().numel())
+        else:#实际上本代码跑的是else这种情况
+            #使用定制的优化器和损失函数
+            l.sum().backward()
+            updater(X.shape[0])
+            # 如果是自我实现的话，l出来是向量，我们先做求和，再求梯度,梯度清零已经包含在自我实现的优化函数里了
+            #metric.add(float(l.sum()), accuracy(y_hat, y), y.numel())
+        metric.add(float(l.sum()),accuracy(y_hat,y),y.numel())#metric.add()其实是可以分情况分为上面两种，合起来的话就是这句。
+    #返回训练损失和训练精度
+    #metric=[损失函数总和，正确预测总数，总预测数]
+    return metric[0] / metric[2],metric[1] / metric[2]#返回平均损失函数，预测正确率
 
 #训练函数它会在train_iter访问到的训练数据集上训练一个模型net。 
 #该训练函数将会运行多个迭代周期（由num_epochs指定）。 在每个迭代周期结束时，

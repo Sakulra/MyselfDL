@@ -58,7 +58,7 @@ def squared_loss(y_hat,y) ->'Tensor':
 
 #定义优化算法，也就是对w,b进行更新，使用小批量随机梯度下降
 def sgd(params:'need_update_object',lr:'learning_rate' = 0.03,batch_size:'int' = 20):
-    """使用从数据集中随机抽取的一个小批量，然后根据参数计算损失的梯度"""
+    """使用从数据集中随机抽取的一个小批量，然后根据参数计算损失的梯度,有梯度清零和自更新"""
     with torch.no_grad():#告诉torch不需要计算梯度
         for param in params:   #在本例中有w,b都需要更新因此params是个列表，包含了w和b
             param -= lr*param.grad/batch_size
