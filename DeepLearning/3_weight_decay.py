@@ -36,13 +36,14 @@ def l2_penalty(w):
     return torch.sum(w.pow(2)) / 2
 
 #优化函数
-def updater(batch_size):
+def updater(batch_size,w,b,lr):
     """优化函数：随机梯度下降sgd"""
     return d2l.sgd([w,b],lr,batch_size)
 
 #训练代码
-def train(lambd:"λ"):
+def train(lambd:"λ",updater):
     w, b = init_params()
+    #net = lambda X: d2l.linreg(X, w, b)
     net = lambda X: torch.matmul(X,w) + b
     loss = d2l.squared_loss
     num_epoch, lr = 100, 0.03
@@ -53,29 +54,36 @@ def train(lambd:"λ"):
             #广播机制使l2_penalty变为batch_size的向量
             l = loss(net(X),y) + lambd*l2_penalty(w)
             l.sum().backward()
-            d2l.sgd([w,b],lr,batch_size)
+            #d2l.sgd([w,b],lr,batch_size)
+            updater(batch_size,w,b,lr)
         if (epoch + 1) % 5 == 0:
             animator.add(epoch + 1,(d2l.evaluate_loss(net,train_iter,loss),
                                     d2l.evaluate_loss(net,test_iter,loss)))
         print('w的L2范数是：', torch.norm(w).item())
 
 #忽略正则化直接训练，必过拟合
-train(lambd=0)
+train(lambd=0,updater=updater)
 #使用权重衰减
-train(lambd=3)
+train(lambd=3,updater=updater)
 d2l.plt.show()
 
 #简洁实现####################################################################################################
-def train_concise(wd):
+def train_concise(weightdecay:bool):#weightdecay是一个bool值，为1的话就权重衰减
     net = nn.Sequential(nn.Linear(num_inputs, 1))
+    #初始化参数w,b
     for param in net.parameters():
         param.data.normal_()
     loss = nn.MSELoss(reduction='none')
     num_epochs, lr = 100, 0.003
     # 偏置参数没有衰减
+    #优化函数，惩罚项既可以写在目标函数里面，也可以写在训练算法里面，每一次在更新前把当前的w诚意衰减因子weight_decay
+    #因为有两个参数需要优化但是优化要求不一样所以有两个字典，对net[0]的weight启用参数衰减，而bias使用默认的
     trainer = torch.optim.SGD([
-        {"params":net[0].weight,'weight_decay': wd},
+        {"params":net[0].weight,'weight_decay': weightdecay},
         {"params":net[0].bias}], lr=lr)
+    trainer = torch.optim.SGD([
+        {"params":net[0]}
+    ])
     animator = d2l.Animator(xlabel='epochs', ylabel='loss', yscale='log',
                             xlim=[5, num_epochs], legend=['train', 'test'])
     for epoch in range(num_epochs):
@@ -90,4 +98,4 @@ def train_concise(wd):
                           d2l.evaluate_loss(net, test_iter, loss)))
     print('w的L2范数：', net[0].weight.norm().item())
 
-train_concise(0)
+#train_concise(0)

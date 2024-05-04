@@ -197,70 +197,70 @@
 # args = ('two',1,2)
 # kwargs = {'arg1':'one','arg2':2,'arg3':'three'}
 # fn(**kwargs)
-#################################################################################################
-#高维线性回归
+#######################################模型网络参数形状##########################################################
+# import torch.nn as nn
+# import torch
+# @torch.no_grad()
+# def init_weights(m):
+#     print(m)
+#     if type(m) == nn.Linear:
+#         m.weight.fill_(1.0)
+#         print(m.weight)
+# net = nn.Sequential(nn.Linear(4,2,bias=False), nn.Linear(2, 3,bias=True))
+# print(net)
+# print('isinstance torch.nn.Module',isinstance(net,torch.nn.Module))
+# print(' ')
+# net.apply(init_weights)
+############################################################################################################
 import torch
 from torch import nn
 from d2l import torch as d2l
 from d2l import oldtorch as oldd2l
 
-#生成数据y=0.05+∑0.01xi+ε，ε∈N（0，0.01**2）
-n_train, n_test, num_inputs, batch_size = 20, 100, 200, 5
-true_w, true_b = torch.ones((num_inputs,1))*0.01, 0.05
+def dropout_layer(X, dropout):
+    assert 0 <= dropout <= 1
+    # 在本情况中，所有元素都被丢弃
+    if dropout == 1:
+        return torch.zeros_like(X)
+    # 在本情况中，所有元素都被保留
+    if dropout == 0:
+        return X
+    mask = (torch.rand(X.shape) > dropout).float()
+    return mask * X / (1.0 - dropout)
 
-def synthetic_data(w, b, num_examples):
-    """生成 y = Xw + b + noise."""
-    X = torch.normal(0, 1, (num_examples, len(w)))
-    y = torch.matmul(X, w) + b
-    y += torch.normal(0, 0.01, y.shape)
-    return X, y
+num_inputs, num_outputs, num_hiddens1, num_hiddens2 = 784, 10, 256, 256
 
-def load_array(data_arrays, batch_size, is_train=True):
-    """Construct a PyTorch data iterator."""
-    dataset = torch.utils.data.TensorDataset(*data_arrays)
-    return torch.utils.data.DataLoader(dataset, batch_size, shuffle=is_train)
+dropout1, dropout2 = 0.2, 0.5
 
-train_data = synthetic_data(true_w,true_b,n_train)
-train_iter = load_array(train_data,batch_size)
-test_data = synthetic_data(true_w,true_b,batch_size)
-test_iter = load_array(test_data,batch_size,is_train=False)
+class Net(nn.Module):
+    def __init__(self, num_inputs, num_outputs, num_hiddens1, num_hiddens2,is_training = True):
+        super(Net, self).__init__()
+        self.num_inputs = num_inputs
+        self.training = is_training
+        self.lin1 = nn.Linear(num_inputs, num_hiddens1)
+        self.lin2 = nn.Linear(num_hiddens1, num_hiddens2)
+        self.lin3 = nn.Linear(num_hiddens2, num_outputs)
+        self.relu = nn.ReLU()
 
-#初始化参数模型
-def init_params():
-    w = torch.normal(0, 1, size=(num_inputs,1),requires_grad=True)
-    b = torch.zeros(1,requires_grad=True)
-    return [w,b]
+    def forward(self, X):
+        H1 = self.relu(self.lin1(X.reshape((-1, self.num_inputs))))
+        # 只有在训练模型时才使用dropout
+        if self.training == True:
+            # 在第一个全连接层之后添加一个dropout层
+            H1 = dropout_layer(H1, dropout1)
+        H2 = self.relu(self.lin2(H1))
+        if self.training == True:
+            # 在第二个全连接层之后添加一个dropout层
+            H2 = dropout_layer(H2, dropout2)
+        out = self.lin3(H2)
+        return out
 
-#L2范数
-def l2_penalty(w):
-    return torch.sum(w.pow(2)) / 2
 
-#优化函数
-def updater(batch_size,w,b,lr):
-    """优化函数：随机梯度下降sgd"""
-    return d2l.sgd([w,b],lr,batch_size)
+net = Net(num_inputs, num_outputs, num_hiddens1, num_hiddens2)
 
-#训练代码
-def train(lambd:"λ"):
-    w, b = init_params()
-    net = lambda X: torch.matmul(X,w) + b
-    loss = d2l.squared_loss
-    num_epoch, lr = 100, 0.03
-    animator = d2l.Animator(xlabel='epoch',ylabel='loss',yscale='log',xlim=[5,num_epoch],legend=['train','test'])
-    for epoch in range(num_epoch):
-        for X, y in train_iter:
-            #增加L2范数惩罚项
-            #广播机制使l2_penalty变为batch_size的向量
-            l = loss(net(X),y) + lambd*l2_penalty(w)
-            l.sum().backward()
-            d2l.sgd([w,b],lr,batch_size)
-        if (epoch + 1) % 5 == 0:
-            animator.add(epoch + 1,(d2l.evaluate_loss(net,train_iter,loss),
-                                    d2l.evaluate_loss(net,test_iter,loss)))
-        print('w的L2范数是：', torch.norm(w).item())
-
-#忽略正则化直接训练，必过拟合
-#train(lambd=0)
-#使用权重衰减
-train(lambd=3)
+num_epochs, lr, batch_size = 10, 0.5, 256
+loss = nn.CrossEntropyLoss(reduction='none')
+train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size)
+trainer = torch.optim.SGD(net.parameters(), lr=lr)
+oldd2l.train_ch3(net, train_iter, test_iter, loss, num_epochs, trainer)
 d2l.plt.show()

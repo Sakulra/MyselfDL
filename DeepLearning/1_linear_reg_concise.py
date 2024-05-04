@@ -41,6 +41,7 @@ net = nn.Sequential(nn.Linear(2,1))
 #在这里，我们指定每个权重参数应该从均值为0、标准差为0.01的正态分布中随机采样， 偏置参数将初始化为零。
 net[0].weight.data.normal_(0,0.01)
 net[0].bias.data.fill_(0)
+print('parameters:',list(net.parameters()))
 #通过net[0]选择网络中的第一个图层，然后使用weight.data和bias.data方法访问参数。
 #还可以使用替换方法normal_和fill_来重写参数值。
 
