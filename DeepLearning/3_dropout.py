@@ -4,6 +4,8 @@ from d2l import torch as d2l
 from d2l import oldtorch as oldd2l
 
 #以dropout的概率丢弃节点
+#h'={0      ,概率为p
+#   {h/(1-p),其他
 def dropout_layer(X, dropout):
     assert 0 <= dropout <= 1
     #丢弃所有元素
@@ -30,6 +32,8 @@ dropout1, dropout2 = 0.2, 0.5
 
 class Net(nn.Module):
     def __init__(self, num_inputs, num_outputs, num_hiddens1, num_hiddens2, is_train = True) -> None:
+        #super(Net, self).__init__()就是将Net的父类的__init__函数放到自己里面调用，这样子类就拥有了父类init的东西了。
+        #本代码Net类继承nn.Module，就是对继承自父类nn.Module的属性进行初始化。而且是用nn.Module的初始化方法来初始化继承的属性。
         super(Net, self).__init__()
         self.num_inputs = num_inputs
         self.training = is_train
@@ -37,7 +41,8 @@ class Net(nn.Module):
         self.lin2 = nn.Linear(num_hiddens1, num_hiddens2)
         self.lin3 = nn.Linear(num_hiddens2, num_outputs)
         self.relu = nn.ReLU()
-    
+
+    #父类也定义的有forward(),为了覆盖父类的forward(),便于进行前向传播
     def forward(self, X):
         H1 = self.relu(self.lin1(X.reshape((-1, self.num_inputs))))
         #只有在训练模式才使用dropout
@@ -62,6 +67,7 @@ oldd2l.train_ch3(net,train_iter,tesr_iter,loss,num_epochs,optimizer)
 
 #简洁实现
 #在训练时，Dropout层将根据指定的暂退概率随机丢弃上一层的输出（相当于下一层的输入）。 在测试时，Dropout层仅传递数据。
+#Flatten先展平为张量
 net = nn.Sequential(nn.Flatten(),
                     nn.Linear(784,256),
                     nn.ReLU(),
@@ -73,6 +79,8 @@ net = nn.Sequential(nn.Flatten(),
                     nn.Dropout(dropout2),
                     nn.Linear(256,10))
 
+#nn.Linear()的文档，这个函数自动会对w和b进行uniform的初始化。这里是想要把w改成高斯分布才特意强调的。
+#这个m就是net里面的每一层模块
 def init_weight(m):
     if type(m) == nn.Linear:
         nn.init.normal(m.weight,std = 0.01)

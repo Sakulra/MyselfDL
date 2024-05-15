@@ -46,16 +46,30 @@
    optimizer.zero_grad()的作用是清除所有可训练的torch.Tensor的梯度。
    zero_grad()清除梯度
 @12.为对抗过拟合的技术称为正则化（regularization）
-   使用L2范数正则化的一个原因是它对权重向量的大分量施加了巨大的惩罚。 这使得我们的学习算法偏向于在大量特征上均匀分布权重的模型。
-   在实践中，这可能使它们对单个变量中的观测误差更为稳定。 相比之下，L1惩罚会导致模型将权重集中在一小部分特征上， 而将其他权重清除为零.这称为特征选择。
-@13.影响模型泛化的因素:
+   正则化的作用：防止过拟合、提高模型的泛化能力、减小模型复杂度、控制模型的学习速率、提高模型的鲁棒性(对输入微小变化不敏感)。
+   常见正则化：L1正则化、L2正则化、Elastic Net正则化、Dropout、早停、数据增强、批量归一化、权重衰减。
+   L1：在模型的损失函数中增加权重的 L1 范数来实现正则化。L1 正则化倾向于产生稀疏权重矩阵，即将一些权重推向零，从而实现特征选择的效果。
+   L2：使用L2范数正则化的一个原因是它对权重向量的大分量施加了巨大的惩罚。 这使得我们的学习算法偏向于在大量特征上均匀分布权重的模型。
+       在实践中，这可能使它们对单个变量中的观测误差更为稳定。 相比之下，L1惩罚会导致模型将权重集中在一小部分特征上， 而将其他权重清除为零,这称为特征选择。
+   Elastic Net:是 L1 和 L2 正则化的组合,它在损失函数中同时使用 L1 和 L2 范数，可以综合两者的优点.
+   Dropout：随机丢弃隐藏中的节点
+   早停：它在训练过程中监视模型在验证集上的性能，一旦验证集上的性能开始下降，就停止训练。
+   数据增强：通过对训练数据进行变换来增加数据的多样性，从而减少过拟合的风险。例如，在图像分类任务中可以进行随机裁剪、旋转、翻转等操作来增加训练数据的数量。
+   批量归一化：对每个批次的输入进行归一化来加速训练并减少过拟合的技术。
+   权重衰减：在损失函数中增加惩罚项，加L1就是L1正则化，加L2就是L2正则化。
+@13.暂退法(dropout)(应用于全连接层)：在计算后续层之前向网络的每一层注入噪声。因为当训练一个有多层的深层网络时，注入噪声只会在输入-输出映射上增强平滑性。
+   dropout只在训练集上应用而不应用于测试集，dropout是为了防止过拟合，而在测试集中应该用训练好的整个网络。
+   BN(应用于卷积层)
+@14.影响模型泛化的因素:
    1. 可调整参数的数量。当可调整参数的数量（有时称为自由度）很大时，模型往往更容易过拟合
    2. 参数采用的值。当权重的取值范围较大时，模型可能更容易过拟合。
    3. 训练样本的数量。即使模型很简单，也很容易过拟合只包含一两个样本的数据集。
-@14.自定义网络时class类里面的forward函数有什么用？
-@15.暂退法(dropout)：在计算后续层之前向网络的每一层注入噪声。因为当训练一个有多层的深层网络时，注入噪声只会在输入-输出映射上增强平滑性。
-   dropout只在训练集上应用而不应用于测试集，dropout是为了防止过拟合，而在测试集中应该用训练好的整个网络。
-@16.正向传播，反向传播
+   为什么限制参数的取值范围模型复杂度就低呢？
+   因为如果参数可以取很大很小，那么函数就可以尽可能地靠近每一个训练数据，那么学习出的函数就会不怎么平滑，同时此函数必然会更复杂。
+@15.自定义网络时class类里面的forward函数有什么用？
+    它是自定义网络的核心之一，自定义时在__init__函数中初始化各种网络参数，然后在forward函数中编写各网络的关系，即实现各个层之间的连接关系。
+@16.正向传播：按顺序（从输入层到输出层）计算和存储神经网络中每层的结果。
+    反向传播：是计算神经网络参数梯度的方法。根据微积分中的链式规则，按相反的顺序从输出层到输入层遍历网络。
 2.矩阵a的截取：a[起始行：结束行，起始列：结束列]，如果只截取某2列为a[,1]，因为第二列的索引是1，
    a[2]只截取第三行
    还有a[起始行：结束行：间隔行，起始列：结束列：间隔列],如a[::3,::2]，从第零行开始，每三行一跳，每两列一跳.
@@ -419,7 +433,7 @@ for i, data in enumerate(train_loader, 1):
 44.torch.nn.Flatten(start_dim=1, end_dim=- 1),start_dim和end_dim，分别表示开始的维度和终止的维度，默认值分别是1和-1，
    其中1表示第一维度，-1表示最后的维度。结合起来看意思就是从第一维度到最后一个维度全部给展平为张量。
    注意：数据的维度是从0开始的，也就是存在第0维度，第一维度并不是真正意义上的第一个。看源代码。
-45.net.apply(),pytorch的任何网络net，都是torch.nn.Module的子类,都算是module。pytorch中的model.apply(fn)会递归地将函数fn应用到
+45.net.apply(),pytorch的任何网络net，都是torch.nn.Module的子类,都算是module。pytorch中的model.apply(fn)会递归地将 函数fn 应用到
    父模块的每个子模块submodule，也包括model这个父模块自身。如果要对某些特定的子模块submodule做一些针对性的处理，
    可以加入type(m) == nn.Linear:这类判断语句，从而对子模块m进行处理，看源码。模型的参数的权重w其实也是按行存储的。
    
@@ -508,4 +522,106 @@ for i, data in enumerate(train_loader, 1):
    和randn的区别：normal可以自己设定均值和标准差。
 
    torch.randperm(n, out=None) → 给定参数n，返回一个从[0, n -1) 的随机整数排列,建议使用torch.arange()
-52.
+52.super(Net, self).__init__()是指首先找到Net的父类（比如是类NNet），然后把类Net的对象self转换为类NNet的对象，
+   然后“被转换”的类NNet对象调用自己的init函数，其实简单理解就是子类把父类的__init__()放到自己的__init__()当中，
+   这样子类就有了父类的__init__()的那些东西。子类继承了父类的所有属性和方法，父类属性自然会用父类方法来进行初始化。
+53.神经网络的搭建：设计神经网络的核心：构造函数__init__和forward方法
+   注意事项：
+   我们在定义自已的网络的时候，需要继承nn.Module类，并重新实现构造函数__init__和forward这两个方法。
+   1.一般把网络中具有可学习参数的层（如全连接层、卷积层等）放在构造函数__init__()中，所有放在__init__里面的层的都是这个模型的“固有属性。
+   2.一般把不具有可学习参数的层(如ReLU、dropout、BatchNormanation层)放在构造函数中
+   3.forward方法是必须要重写的，它是实现模型的功能，实现各个层之间的连接关系的核心
+   import torch
+   class MyNet(torch.nn.Module):
+       # 重写构造函数，构造函数也被称为构造器，当创建对象的时候第一个被自动调用的函数
+       # 一旦创建对象，则会自动调用该构造函数，完成对象的属性的初始化设置
+       def __init__(self):
+
+           #第一步：调用父类的构造函数，以继承父类的一些属性
+           super(MyNet, self).__init__()  
+           
+           #第二步，增加一些属性，比如Conv2d卷积层、ReLU激活函数层、MaxPool2d池化层
+           # 通过self.属性名的方式，给创建的初始化实例对象增加一些属性
+           self.conv = torch.nn.Conv2d(3, 32, 3, 1, 1)
+           self.relu=torch.nn.ReLU()
+           self.max_pooling=torch.nn.MaxPool2d(2,1)
+    
+           self.dense = torch.nn.Linear(32 * 3 * 3, 10)
+    
+   
+           #第三步：覆写forward方法，实现前面定义的各个层的顺序连接，也就是完成来了前向传播
+       def forward(self, x):
+           x = self.conv1(x)
+           x = self.relu1(x)
+           x = self.max_pooling(x)
+           x = self.dense(x)
+           # 前向传播结束后，返回最终得到的计算值
+           return x
+   
+           #第四步：创建一个对象，该对象会自动调用构造函数__init__()，就是说该对象已经被添加了一些层的属性 
+   model = MyNet()
+   print(model)
+
+   搭建神经网络的不同方式：
+   1.直接使用nn.Sequential打包不同的层
+   import torch.nn as nn
+   from collections import OrderedDict
+   class MyNet(nn.Module):
+       def __init__(self):
+           super(MyNet, self).__init__()
+           # 将卷积层配套打包
+           self.conv_block = nn.Sequential(
+               nn.Conv2d(3, 32, 3, 1, 1),
+               nn.ReLU(),
+               nn.MaxPool2d(2))
+           
+           # 将全连接层页配套打包
+           self.dense_block = nn.Sequential(
+               nn.Linear(32 * 3 * 3, 128),
+               nn.ReLU(),
+               nn.Linear(128, 10)
+           )
+       # 在这里实现了打包之后的块（层）之间的连接关系，就是前向传播
+       def forward(self, x):
+           conv_out = self.conv_block(x)
+           res = conv_out.view(conv_out.size(0), -1)
+           out = self.dense_block(res)
+           return out
+ 
+   model = MyNet()
+   print(model)
+
+   2.通过OrderedDict中的元组方式打包层，同时可以给各层命名
+   import torch.nn as nn
+   from collections import OrderedDict
+   class MyNet(nn.Module):
+      def __init__(self):
+         super(MyNet, self).__init__()
+         
+         # 注意这里可以算是一个完整的卷积块，这样看起来是不是更方便一些
+         self.conv_block = nn.Sequential(
+               OrderedDict(
+                  [
+                     ("conv1", nn.Conv2d(3, 32, 3, 1, 1)),
+                     ("relu1", nn.ReLU()),
+                     ("pool", nn.MaxPool2d(2))
+                  ]
+               ))
+            
+               # 这里可以算是一个完整的全连接块
+         self.dense_block = nn.Sequential(
+               OrderedDict([
+                  ("dense1", nn.Linear(32 * 3 * 3, 128)),
+                  ("relu2", nn.ReLU()),
+                  ("dense2", nn.Linear(128, 10))
+               ])
+         )
+   
+      def forward(self, x):
+         conv_out = self.conv_block(x)
+         res = conv_out.view(conv_out.size(0), -1)
+         out = self.dense_block(res)
+         return out
+   
+   model = MyNet()
+   print(model)
