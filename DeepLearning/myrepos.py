@@ -91,7 +91,8 @@ class Accumulator:
 #####################################激活函数############################################
 #relu
 # #relu激活函数,被定义为输入元素与0的最大值：
-x = torch.arange(-8.0,8.0,0.1,requires_grad=True)
+#x = torch.arange(-8.0,8.0,0.1,requires_grad=True)
+
 #y = torch.relu(x)
 # print(x.shape==y.shape)
 # figs,axs = plt.subplots(2,1,figsize=(5,2.5),sharey=True,sharex=True)
@@ -131,6 +132,7 @@ x = torch.arange(-8.0,8.0,0.1,requires_grad=True)
 # set_axes(axs[1],'x','grad of tanh(x)')
 # d2l.plt.show()
 
+############################################################################
 # @torch.no_grad()
 # def init_weights(m):
 #     print(m)
@@ -141,11 +143,30 @@ x = torch.arange(-8.0,8.0,0.1,requires_grad=True)
 # print(' ')
 # net.apply(init_weights)
 
-@torch.no_grad()
-def init_weights(m):
-    print(m)
-    if type(m) == nn.Linear:
-        m.weight.fill_(1.0)
-        print(m.weight)
-net = nn.Sequential(nn.Linear(2, 4), nn.Linear(4, 8))
-net.apply(init_weights)
+# @torch.no_grad()
+# def init_weights(m):
+#     print(m)
+#     if type(m) == nn.Linear:
+#         m.weight.fill_(1.0)
+#         print(m.weight)
+# net = nn.Sequential(nn.Linear(2, 4), nn.Linear(4, 8))
+# net.apply(init_weights)
+
+#################################################梯度爆炸和消失###############################################
+import torch
+from d2l import torch as d2l
+
+x = torch.arange(-8.0, 8.0, 0.1, requires_grad=True)
+y = torch.sigmoid(x)
+y.backward(torch.ones_like(x))
+
+d2l.plot(x.detach().numpy(), [y.detach().numpy(), x.grad.numpy()],
+         legend=['sigmoid', 'gradient'], figsize=(4.5, 2.5))
+d2l.plt.show()
+
+M = torch.normal(0, 1, size=(4,4))
+print('一个矩阵 \n',M)
+for i in range(100):
+    M = torch.mm(M,torch.normal(0, 1, size=(4, 4)))
+
+print('乘以100个矩阵后\n', M)
