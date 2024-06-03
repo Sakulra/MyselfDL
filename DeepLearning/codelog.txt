@@ -70,6 +70,10 @@
     它是自定义网络的核心之一，自定义时在__init__函数中初始化各种网络参数，然后在forward函数中编写各网络的关系，即实现各个层之间的连接关系。
 @16.正向传播：按顺序（从输入层到输出层）计算和存储神经网络中每层的结果。
     反向传播：是计算神经网络参数梯度的方法。根据微积分中的链式规则，按相反的顺序从输出层到输入层遍历网络。
+@17.object类型是其他类诸如int64，float64，str类的基类，其他类都继承object类
+@18.在编写函数时如果要对某些参数设置默认值，那么这个参数之后的参数也必须设置默认值，否则报错。或者最后写这个需要默认值的参数。
+    有些python版本会把NA和None都视为缺失值，这导致None类型被错误理解为缺失值。
+
 2.矩阵a的截取：a[起始行：结束行，起始列：结束列]，如果只截取某2列为a[,1]，因为第二列的索引是1，
    a[2]只截取第三行
    还有a[起始行：结束行：间隔行，起始列：结束列：间隔列],如a[::3,::2]，从第零行开始，每三行一跳，每两列一跳.
@@ -84,15 +88,15 @@
    cols = torch.tensor([[0,2],[0,2]])
    y = x[rows,cols]
 
-3.矩阵切片loc和iloc。loc函数：通过行索引 "Index" 中的具体值来取行数据（如取"Index"为"A"的行）
+3.矩阵切片loc[]和iloc[]。loc函数：通过行索引 "Index" 中的具体值来取行数据（如取"Index"为"A"的行）
    iloc函数：通过行号来取行数据（如取第二行的数据）。
-#创建一个Dataframe
+#创建一个Dataframe结构的数据
 data=pd.DataFrame(np.arange(9).reshape(3,3),index=list('abc'),columns=list('ABC'))
 Out: 
     A   B   C
 a   0   1   2
-b   4   5   6
-c   8   9  10
+b   3   4   5
+c   6   7  8
 #取索引为'a'的行
 In: data.loc['a']
 Out:
@@ -109,12 +113,14 @@ In:data.loc[['a','b'],['A','B']] #提取index为'a','b',列名为'A','B'中的�
 Out: 
    A  B
 a  0  1
-b  4  5
+b  3  4
 In:data.iloc[[0,1],[0,1]] #提取第0、1行，第0、1列中的数据
+或者data.iloc[0:1,0:1]
 Out: 
    A  B
 a  0  1
-b  4  5
+b  3  4
+对于特别大的矩阵也有取前四行的正数第1，2，3，4列和倒数1，2，3，4列，data.iloc[0:4, [0, 1, 2, 3, -3, -2, -1]]
 
 4.item()的作用是取出单元素张量的元素数值并返回该数值，保持原元素类型不变。
   a=torch.tensor([3.5])
@@ -638,3 +644,45 @@ for i, data in enumerate(train_loader, 1):
    在线学习：首先观测到Xi然后我们得出一个估计值发f(Xi),只有当我们做到这一点后，我们才观测到yi然后根据我们的决定，我们会得到奖励或损失。
    控制：将PID应用于自动调整超参数。
    强化学习：强调如何基于环境而行动，以取得最大化的预期利益。
+57.type()返回数据结构类型(list,dict,numpy)
+   dtype()返回数据元素的数据类型(int,float...)由于列表和字典可以包含不同类型的对象，所以无法调用dtype
+   astype()改变numpy.array中所有数据元素的数据类型
+58.Dataframe是pandas中的数据结构，类似于excel，可以设置列名和行名
+   1.使用字典创建，默认生成整数索引, 字典的键作列,值作行
+   data = {'state': ['Ohio', 'Ohio', 'Ohio', 'Nevada', 'Nevada'],
+           'year': [2000, 2001, 2002, 2001, np.nan],  # np.nan表示NA
+           'pop': [1.5, 1.7, 3.6, 2.4, 2.9]}
+   DataFrame(data)
+   输出：
+       state	year	pop
+   0	Ohio	  2000.0	1.5
+   1	Ohio	  2001.0	1.7
+   2	Ohio	  2002.0	3.6
+   3	Nevada  2001.0	2.4
+   4	Nevada  NaN	2.9   
+   2.也可使用嵌套字典创建，最外层的键作为行名，内层的键作为列名
+   3.传递一个numpy array，时间索引以及列标签来创建一个DataFrame
+   data = DataFrame(np.arange(10,26).reshape((4, 4)),
+                 index=['Ohio', 'Colorado', 'Utah', 'New York'], 
+                 columns=['one', 'two', 'three', 'four'])
+   输出：
+   	      one	two  three	four
+   Ohio	   10	   11	  12	  13
+   Colorado	14	   15	  16	  17
+   Utah	   18	   19	  20	  21
+   New York	22	   23	  24	  25   
+59.pandas.concat( objs, axis=0)
+   objs是要合并的对象，比如df1,df2,传递的时候把二者放进小括号或者中括号里都行[df1.df2]或(df1,df2)
+   axis是要合并的轴，默认是axis=0,即按行合并也就是上下堆叠
+60.hashlib加密
+   包括hashlib.md5()将任意长度的信息转换为一个 128 位的哈希值
+   hashlib.sha1()比md5安全性更高，其他一样
+   hashlib.256()将任意长度的信息转换为一个 256 位的哈希值
+   hashlib.512()将任意长度的信息转换为一个 512 位的哈希值
+   import hashlib
+   hash_object = hashlib.md5()
+   hash_object.update(b'Hello World') # b'Hello World' 表示将字符串 'Hello World' 转化为二进制数据
+   print(hash_object.hexdigest())
+61.pandas.get_dummies(data, dummy_na=False，dtype=None)
+   进行独热编码时出现TypeError: can't convert np.ndarray of type numpy.object_.就要指定dtype值
+   某些ide独热编码时会将数据处理成boolean类型，需要指定处理类型为数值型，如int.
