@@ -167,6 +167,9 @@ b  3  4
   torch.sum(input,dim)对向量的指定维度进行求和,得到的还是一个tensor
 10.tensor.detach()返回一个新的tensor，从当前计算图中分离下来的，但是仍指向原变量的存放位置,
    不同之处只是requires_grad为false，得到的这个tensor永远不需要计算其梯度，不具有grad。
+   将有梯度的tensor转化位numpy用tensor.detach().numpy()
+   将没梯度的tensor转换为numpy直接用tensor.numpy()
+   注意转换后的numpy与tensor指向同一个地址，改变一个另一个也会改变。
 11.matplotlib允许我们将一个figure通过栅格系统划分成不同的格子，然后在格子中画图，这样就可以在一个figure中画多个图了。
   这里的每个格子有两个名称：Axes和subplot。subplot是从figure所有的格子来看的。因为figure要统一管理协调这些格子的位置、
   间隔等属性，管理协调的方法和属性设置就在subplots的层面进行。Axes是从作为画图者的我们的角度来定义的，我们要画的点、线等
@@ -489,6 +492,14 @@ for i, data in enumerate(train_loader, 1):
    x_input = torch.randn(2, 3)
    x_target = torch.tensor([0, 2])
    loss = loss_fn(x_input, x_target)
+
+   torch.nn.MSELoss(reduction=None)计算输入与输出的均方,没有开根。它本身的参数没定义输入和目标，而是在类里面定义的。
+   reduction，默认None，还有均值'mean',求和'sum'。
+   loss = torch.nn.MSELoss()
+   input = torch.randn(3, 5, requires_grad=True)
+   target = torch.randn(3, 5)
+   output = loss(input,target)
+   output.backward()
 47.torch.optim.SGD(params, lr=<required parameter>, momentum=0, dampening=0, weight_decay=0, nesterov=False)
    params（必须参数）: 这是一个包含了需要优化的参数（张量）的迭代器，例如模型的参数 model.parameters()。
    momentum（默认值为 0）: 动量（momentum）是一个用于加速 SGD 收敛的参数。它引入了上一步梯度的指数加权平均。通常设置在 0 到 1 之间。
@@ -644,11 +655,24 @@ for i, data in enumerate(train_loader, 1):
    在线学习：首先观测到Xi然后我们得出一个估计值发f(Xi),只有当我们做到这一点后，我们才观测到yi然后根据我们的决定，我们会得到奖励或损失。
    控制：将PID应用于自动调整超参数。
    强化学习：强调如何基于环境而行动，以取得最大化的预期利益。
-57.type()返回数据结构类型(list,dict,numpy)
-   dtype()返回数据元素的数据类型(int,float...)由于列表和字典可以包含不同类型的对象，所以无法调用dtype
+57.type()是python内置函数，适用于任何python对象，包括但不限于pandas的dataframe和series。返回数据结构类型(list,dict,numpy)
+   dtype()是pandas DataFrame和Series对象的属性。返回数据元素的数据类型(int,float...)。
+      对于DataFrame，dtypes返回一个series，其中包含dataframe中每列的数据类型。
+      对于Series dtypes返回该Series数据的单一类型。没什么意外的话每个Serise里得数据类型应该是一样的。
+      注意：由于列表和字典可以包含不同类型的对象，所以无法调用dtype，而是调用type
    astype()改变numpy.array中所有数据元素的数据类型
-58.Dataframe是pandas中的数据结构，类似于excel，可以设置列名和行名
-   1.使用字典创建，默认生成整数索引, 字典的键作列,值作行
+58.pandas.Series(data=None, index=None, dtype=None, name=None, copy=False, fastpath=False)，类似一维数组
+   Series是一维的；都有一个索引，索引默认从0开始的整数；在创建后大小不变，但可通过append等操作改变；支持数学运算、统计分析、字符串处理等操作。
+   Series可以包含缺失值，并用NAN来表示缺失或无值
+   s=pd.Series({'a':1, 'b':2, 'c':3})
+   输出:
+   a  1
+   b  2
+   c  3
+59.pandas.DataFrame(data=None, index=None, columns=None, dtype=None, copy=False)，类似二维数组
+   Dataframe是pandas中的数据结构，类似于excel，可以设置列名和行名
+   dataframe.index()获得行索引，dataframe.columns()获得列索引
+   1.使用字典创建，默认生成整数索引, 字典的键作列,值作行，如果只需要部分字典数据，那么只需在index中指定想要的即可。
    data = {'state': ['Ohio', 'Ohio', 'Ohio', 'Nevada', 'Nevada'],
            'year': [2000, 2001, 2002, 2001, np.nan],  # np.nan表示NA
            'pop': [1.5, 1.7, 3.6, 2.4, 2.9]}
@@ -671,10 +695,20 @@ for i, data in enumerate(train_loader, 1):
    Colorado	14	   15	  16	  17
    Utah	   18	   19	  20	  21
    New York	22	   23	  24	  25   
-59.pandas.concat( objs, axis=0)
+60.pandas.concat( objs, axis=0)
    objs是要合并的对象，比如df1,df2,传递的时候把二者放进小括号或者中括号里都行[df1.df2]或(df1,df2)
    axis是要合并的轴，默认是axis=0,即按行合并也就是上下堆叠
-60.hashlib加密
+
+   torch.cat(tensors, dim=0, out=None)
+   和python中的内置函数cat()， 在使用和目的上，是没有区别的，区别在于前者操作对象是tensor
+   注意：原tensor不能是空的，要连接的tensor维度要和原tensor一致
+   x_train, y_train = None, None #必须是None而不能是'[]'用来初始化
+   if x_train is None:
+      x_train = x_part
+   else:
+      x_train = torch.cat([x_train,x_part],0)
+
+61.hashlib加密
    包括hashlib.md5()将任意长度的信息转换为一个 128 位的哈希值
    hashlib.sha1()比md5安全性更高，其他一样
    hashlib.256()将任意长度的信息转换为一个 256 位的哈希值
@@ -683,6 +717,18 @@ for i, data in enumerate(train_loader, 1):
    hash_object = hashlib.md5()
    hash_object.update(b'Hello World') # b'Hello World' 表示将字符串 'Hello World' 转化为二进制数据
    print(hash_object.hexdigest())
-61.pandas.get_dummies(data, dummy_na=False，dtype=None)
+62.pandas.get_dummies(data, dummy_na=False，dtype=None)将分类变量转化为虚拟变量，如独热编码。
    进行独热编码时出现TypeError: can't convert np.ndarray of type numpy.object_.就要指定dtype值
    某些ide独热编码时会将数据处理成boolean类型，需要指定处理类型为数值型，如int.
+   并且有的ide会把NAN和空值当成一样的来进行处理，如果要想让ide知道NAN是有意义的，就需要先对NAN进行转换，转换成任何一个其他标记
+63.DataFrame.fillna(value=None, axis=None, inplace=False)
+   value:用于填充缺失值的值，可以是标量、字典、Series 或 DataFrame
+   axis：指定在哪个轴上执行填充操作。
+   inplace：是否在原 DataFrame 上直接进行修改。
+64.torch.clamp(input, min, max, out=None)
+   将input的值限制在[min, max]之间，并返回结果。常用的有1，float('inf')等。
+65.slice(start, stop, step)是Python内置的一个函数，用于生成一个切片对象。
+   s = "Hello, World!"
+   print(s[slice(0, 5)])  # 输出 "Hello"
+   print(s[slice(0, 12, 2)])  # 输出 "HloWrd"
+66.

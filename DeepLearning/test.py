@@ -212,3 +212,22 @@
 # print(' ')
 # net.apply(init_weights)
 ############################################################################################################
+# import pandas as pd
+
+# data1 = pd.DataFrame({'age':[1.0,1.0,3.0,4.0], 'goal':[91,91,93,94]})
+# print(data1)
+# idx = data1.dtypes.index
+# data1[idx]=data1[idx].apply(
+#     #lambda x: (x-x.mean())/x.std()
+#     lambda x:print(x+x)
+# )
+# #print(data1)
+
+##########################################################################################################
+import torch
+
+X = None
+# x = torch.tensor([[3,4,5],[6,7,8]])
+# X = x
+target = torch.tensor([[0,1,2],])
+print(torch.cat((X,target),0))
