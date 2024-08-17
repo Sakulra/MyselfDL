@@ -160,10 +160,10 @@ b  3  4
   *表示两个矩阵对应位置处的两个元素相乘
   torc.dot(x,y): x和y对应位置相乘最后相加,x，y均为一维向量，和np.dot()不同，不能是多维矩阵，
   torch.mul()等同*:表示相同shape矩阵点乘，即对应位置相乘，得到矩阵有相同的shape，可用广播机制。
-  torch.mm(a, b)等同@：正常矩阵相乘，要求a的列数与b的行数相同。
-  torch.mv(X, w0):矩阵和向量相乘.第一个参数是矩阵，第二个参数只能是一维向量,等价于X乘以w0的转置
+  torch.mm(a, b)等同@：正常矩阵相乘，要求a的列数与b的行数相同。不会进行广播
+  torch.mv(X, w0):矩阵和向量相乘.第一个参数是矩阵，第二个参数只能是一维向量,等价于X乘以w0的转置。
   Y.t():矩阵Y的转置。
-  torch.matmul(input, other) → Tensor，计算两个张量input和other的矩阵乘积，可利用广播机制进行不同维度的相乘操作。
+  torch.matmul(input, other) → Tensor，可用于pytorch绝大多数乘法。计算两个张量input和other的矩阵乘积，可利用广播机制进行不同维度的相乘操作。
   torch.sum(input,dim)对向量的指定维度进行求和,得到的还是一个tensor
 10.tensor.detach()返回一个新的tensor，从当前计算图中分离下来的，但是仍指向原变量的存放位置,
    不同之处只是requires_grad为false，得到的这个tensor永远不需要计算其梯度，不具有grad。
@@ -417,8 +417,8 @@ for i, data in enumerate(train_loader, 1):
    如果是是只想训练某一个model或者一部分model，可以选择对需要训练的那个model进行model.zero_grad，然后使用他对应的optimizer进行优化。
    如果是想对所有的model进行训练，那么使用total_optimizer.zero_grad是更优的方式。
 42.当向量没有进行过求导运算时进行梯度清零会报错AttributeError: 'NoneType' object has no attribute 'data'
-43.nn.Sequential()一个有序的容器,里面的神经网络模块将按照在传入构造器的顺序依次被添加到计算图中执行，
-   所以必须确保前一个模块的输出大小和下一个模块的输入大小是一致的。
+43.nn.Sequential()一个有序的容器,可以看作列表。可通过net[idx]来访问里面的每一个模块。比如net[2].state_dict()、net[2].bias.data
+   里面的神经网络模块将按照在传入构造器的顺序依次被添加到计算图中执行，所以必须确保前一个模块的输出大小和下一个模块的输入大小是一致的。
    使用方法一：作为一个有顺序的容器
    model = nn.Sequential(
       nn.Conv2d(1,20,5),
@@ -438,6 +438,7 @@ for i, data in enumerate(train_loader, 1):
           ('relu2', nn.ReLU())
          ]))
    net = nn.Sequential()
+   net[0]指Sequential里面的第一个模块，以此类推。
    net.add_module('linear1', nn.Linear(num_inputs, num_hiddens))
    net.add_module('linear2', nn.Linear(num_hiddens, num_ouputs))
 44.torch.nn.Flatten(start_dim=1, end_dim=- 1),start_dim和end_dim，分别表示开始的维度和终止的维度，默认值分别是1和-1，
@@ -567,7 +568,7 @@ for i, data in enumerate(train_loader, 1):
            self.dense = torch.nn.Linear(32 * 3 * 3, 10)
     
    
-           #第三步：覆写forward方法，实现前面定义的各个层的顺序连接，也就是完成来了前向传播
+           #第三步：覆写forward方法，实现前面定义的各个层的顺序连接，也就是完成来了前向传播。
        def forward(self, x):
            x = self.conv1(x)
            x = self.relu1(x)
@@ -663,6 +664,8 @@ for i, data in enumerate(train_loader, 1):
    astype()改变numpy.array中所有数据元素的数据类型
 58.pandas.Series(data=None, index=None, dtype=None, name=None, copy=False, fastpath=False)，类似一维数组
    Series是一维的；都有一个索引，索引默认从0开始的整数；在创建后大小不变，但可通过append等操作改变；支持数学运算、统计分析、字符串处理等操作。
+   Series.index
+   Series.values可以访问它里面的值
    Series可以包含缺失值，并用NAN来表示缺失或无值
    s=pd.Series({'a':1, 'b':2, 'c':3})
    输出:
@@ -671,7 +674,9 @@ for i, data in enumerate(train_loader, 1):
    c  3
 59.pandas.DataFrame(data=None, index=None, columns=None, dtype=None, copy=False)，类似二维数组
    Dataframe是pandas中的数据结构，类似于excel，可以设置列名和行名
-   dataframe.index()获得行索引，dataframe.columns()获得列索引
+   dataframe.index()获得行索引
+   dataframe.columns()获得列索引
+   dataframe.values获得里面的值
    1.使用字典创建，默认生成整数索引, 字典的键作列,值作行，如果只需要部分字典数据，那么只需在index中指定想要的即可。
    data = {'state': ['Ohio', 'Ohio', 'Ohio', 'Nevada', 'Nevada'],
            'year': [2000, 2001, 2002, 2001, np.nan],  # np.nan表示NA
@@ -731,4 +736,9 @@ for i, data in enumerate(train_loader, 1):
    s = "Hello, World!"
    print(s[slice(0, 5)])  # 输出 "Hello"
    print(s[slice(0, 12, 2)])  # 输出 "HloWrd"
-66.
+66.nn.init.里包含很多用于初始化的函数
+   nn.inin.normal_()正态初始化
+   nn.init.zeros_()全零初始化
+   nn.init.constant_()常数初始化
+   nn.init.xavier_uniform_(m.weight,mean,std)
+   nn.init.uniform_(m.weight,mean,std)

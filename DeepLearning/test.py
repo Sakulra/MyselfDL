@@ -93,7 +93,8 @@
 
 # a=torch.tensor([[1,2,3],[4,5,6]])
 # b=torch.tensor([1,1,1])
-# print(a+b)
+# c=torch.tensor([1])
+# print(a+c)
 
 # w = torch.empty(3, 5)
 # print(w)
@@ -223,11 +224,54 @@
 # )
 # #print(data1)
 
-##########################################################################################################
-import torch
+############################################ K 折获取训练集和测试集##############################################################
+# import torch
+# def get_k_fold_data(k, i, X, y):
+#     assert k > 1
+#     fold_size = X.shape[0] // k
+#     valid_start = i * fold_size 
+#     valid_end = (i + 1) * fold_size 
 
-X = None
-# x = torch.tensor([[3,4,5],[6,7,8]])
-# X = x
-target = torch.tensor([[0,1,2],])
-print(torch.cat((X,target),0))
+#     #把训练集分割出来
+#     X_head, y_head = X[:valid_start, :], y[:valid_start]
+#     X_tail, y_tail = X[valid_end:, :], y[valid_end:]
+#     #这个判断想不出来
+#     if i == 0:
+#         valid_start = None      
+#         X_head, y_head = torch.tensor([]), torch.tensor([])
+#     elif i == k - 1:
+#         valid_end = None        
+#         X_tail, y_tail = torch.tensor([]), torch.tensor([])
+        
+#     #把测试集分割出来
+#     valid_idx = slice(valid_start, valid_end)
+#     X_valid, y_valid = X[valid_idx, :], y[valid_idx]
+#     #把训练集连接起来
+#     X_train = torch.cat([X_head, X_tail], 0)
+#     y_train = torch.cat([y_head, y_tail], 0)    
+#     return X_train, y_train, X_valid, y_valid
+######################################################################################################
+# import pandas as pd
+# import numpy as np
+# data=pd.DataFrame(np.arange(9).reshape(3,3),index=list('abc'),columns=list('ABC'))
+# print(type(data.values))
+# ts = data.iloc[:,:-1]
+# print(ts)
+############################################层和块###########################################################
+#平行块：它以两个块为参数，例如net1和net2，并返回前向传播中两个网络的串联输出5.1.6
+
+import torch
+from torch import nn
+shared = nn.Linear(8, 8)#因为是8个输入8个输出，因此weight是8x8的矩阵
+X = torch.rand((2,4))
+#net[2]和net[4]的参数是一模一样的，用的是同一个
+net = nn.Sequential(nn.Linear(4, 8), nn.ReLU(),
+                    shared, nn.ReLU(),
+                    shared, nn.ReLU(),
+                    nn.Linear(8, 1))
+net(X)
+# 检查参数是否相同
+print(net[2].weight.data[0] == net[4].weight.data[0])
+net[2].weight.data[0, 0] = 100
+# 确保它们实际上是同一个对象，而不只是有相同的值
+print(net[2].weight.data[0] == net[4].weight.data[0])

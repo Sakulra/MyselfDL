@@ -78,6 +78,7 @@ print('train_data.shape',train_data.shape)
 #print(train_data.iloc[0:4, [0, 1, 2, 3, -3, -2, -1]])
 
 #将测试集和数据集连接成一个整体，并剔除训练数据中的第一列(id编号)。
+#根据左闭右开。由于 -1 训练数据的最后一行也被剔除掉了
 all_features = pd.concat((train_data.iloc[:,1:-1],test_data.iloc[:,1:]))
 
 #数据预处理：将缺失的值替换为相应特征的平均值，并且将所有特征缩放到正态分布N(0,1)。缩放方法在线代中有(x-u)/σ
@@ -87,7 +88,7 @@ all_features = pd.concat((train_data.iloc[:,1:-1],test_data.iloc[:,1:]))
 #将特征是数字的列排除掉,针对非数字列进行处理。
 #all_features.dtypes是获得每一列数据的类型进行返回,然后all_features.dtypes != ‘object’，判断各列数据是否不为object对象。不为则返回True
 #对于DataFrame，dtypes返回一个Series，其中包含DataFrame中每列的数据类型。然后调用index刚好获得每一列的名字,index不是数字就是名字。
-numeric_features = all_features.dtypes[all_features.dtypes != 'object'].index#numeric_features是Series，Series只有index
+numeric_features = all_features.dtypes[all_features.dtypes != 'object'].index#numeric_features是Series，Series只有行索引没有列索引
 
 #print(all_features.dtypes)
 
@@ -133,7 +134,7 @@ def log_rmse(net,features,labels):
 
 def train(net, train_features, train_labels, test_features, test_labels, num_epochs,
           learning_rate, weight_decay, batch_size):
-    """返回训练集损失和测试集损失"""
+    """返回训练集损失train_ls和测试集损失test_ls"""
     train_ls, test_ls = [], []#用来存储训练集和测试集的训练损失函数值
     train_iter = d2l.load_array((train_features,train_labels),batch_size=batch_size)
     #使用adam优化算法,adam的优点在于对初始学习率不敏感
@@ -176,13 +177,39 @@ def get_k_fold_data(k, i, X, y):
             y_train = torch.cat([y_train, y_part],0)
     return x_train, y_train, X_valid, y_valid#返回训练集和验证集
 
+#减少循环版的获取训练集和测试集
+# def get_k_fold_data(k, i, X, y):
+#     assert k > 1
+#     fold_size = X.shape[0] // k
+#     valid_start = i * fold_size 
+#     valid_end = (i + 1) * fold_size 
+
+#     #把训练集分割出来
+#     X_head, y_head = X[:valid_start, :], y[:valid_start]
+#     X_tail, y_tail = X[valid_end:, :], y[valid_end:]
+#     #这个判断想不出来，没有原版好想和方便。
+#     if i == 0:
+#         valid_start = None      
+#         X_head, y_head = torch.tensor([]), torch.tensor([])
+#     elif i == k - 1:
+#         valid_end = None        
+#         X_tail, y_tail = torch.tensor([]), torch.tensor([])
+        
+#     #把测试集分割出来
+#     valid_idx = slice(valid_start, valid_end)
+#     X_valid, y_valid = X[valid_idx, :], y[valid_idx]
+#     #把训练集连接起来
+#     X_train = torch.cat([X_head, X_tail], 0)
+#     y_train = torch.cat([y_head, y_tail], 0)    
+#     return X_train, y_train, X_valid, y_valid
+
 #在k折交叉验证中训练k次后，将每次训练和验证误差做平均值，然后返回
 def k_fold(k, X_train, y_train, num_epochs, learning_rate, weight_decay,
            batch_size):
     train_l_sum, valid_l_sum = 0, 0#训练和测试的均值
-    for i in range(k):
-        data = get_k_fold_data(k, i, X_train, y_train)#把第i折对应分开的数据集、验证集传进train
-        #每一次k折都当成一次独立验证；如果使用同一个net，因为每一折都调用了train()-都有net的更新，
+    for i in range(k):#第i折是测试集，一共k折
+        data = get_k_fold_data(k, i, X_train, y_train)#获得第i折的测试集，和其它折的训练集
+        #每一次k折都当成一次独立验证；如果使用同一个net，因为每一折都调用了train()且都对net参数进行更新，
         #那第i折的验证会受到j<i折验证的影响，使得验证相比实际理想化.
         net = get_net()
         # * 是解码变成前面返回的四个数据，
