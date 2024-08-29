@@ -259,19 +259,47 @@
 # print(ts)
 ############################################层和块###########################################################
 #平行块：它以两个块为参数，例如net1和net2，并返回前向传播中两个网络的串联输出5.1.6
-
 import torch
-from torch import nn
-shared = nn.Linear(8, 8)#因为是8个输入8个输出，因此weight是8x8的矩阵
-X = torch.rand((2,4))
-#net[2]和net[4]的参数是一模一样的，用的是同一个
-net = nn.Sequential(nn.Linear(4, 8), nn.ReLU(),
-                    shared, nn.ReLU(),
-                    shared, nn.ReLU(),
-                    nn.Linear(8, 1))
-net(X)
-# 检查参数是否相同
-print(net[2].weight.data[0] == net[4].weight.data[0])
-net[2].weight.data[0, 0] = 100
-# 确保它们实际上是同一个对象，而不只是有相同的值
-print(net[2].weight.data[0] == net[4].weight.data[0])
+
+def corr2d_multi_in_out_1x1(X, K):
+    c_i, h, w = X.shape
+    c_o = K.shape[0]
+    X = X.reshape((c_i, h * w))
+    K = K.reshape((c_o, c_i))
+    #print('X1',X)
+    print('K1',K)
+    # 全连接层中的矩阵乘法
+    Y = torch.matmul(K, X)
+    return Y.reshape((c_o, h, w))
+
+def corr2d_multi_in_out_1x1_2(X,K):
+    c_i, h, w = X.shape
+    c_o = K.shape[0]
+    X = X.reshape((h * w, c_i))
+    K = K.reshape((c_i, c_o))
+    #print('X2',X)
+    print('K2',K)
+    Y =torch.t(torch.matmul(X, K))
+    return Y.reshape((c_o, h, w))
+X = torch.normal(0, 1, (3, 3, 3))
+#print('X',X)
+K = torch.normal(0, 1, (2, 3, 1, 1))
+print('K',K)
+
+Y1 = corr2d_multi_in_out_1x1(X, K)
+Y2 = corr2d_multi_in_out_1x1_2(X, K)
+#assert float(torch.abs(Y1 - Y2).sum()) < 1e-6
+#print(Y1==Y2)
+# print(Y1)
+# print(Y2)
+
+# import torch
+
+# #A = torch.tensor([[[1,2,3],[4,5,6]],[[7,8,9],[10,11,12]]])
+# A = torch.tensor([[[[1,2,3]],[[4,5,6]]],[[[7,8,9]],[[10,11,12]]]])
+# B = torch.tensor([[[[1]],[[4]]],[[[7]],[[10]]]])
+
+# print('A',A)
+# print('B',B)
+# print(A.reshape(4,3))
+# print(B.reshape(2,2))

@@ -32,7 +32,7 @@
      axis：0轴从第一层向最深层方向
          1轴沿着0行到1行的方向垂直向下(纵向),按行计算(列不变)，得到列的性质；
          2轴沿着0列到1列的方向水平延伸(横向),按列计算，得到行的性质
-     dim：正数就从外面往里数，第一层是0，负数就从里往外数，第一层也是
+     dim：正数就从外面往里数中括号，第一层是dim=0，负数就从里往外数。
 @6.如果a是3x2的矩阵，len(a)返回的是矩阵的行数。矩阵[p,m,n]其中p代表p个切片，m代表m行，n代表n列。
 @7.batch_size其实越小对损失函数的收敛越有益，因为对于深度神经网络是很复杂的，当batch_size比较小的时候，
   在同一批次中噪音比例就会变大，而噪音对神经网络是有好处的，它可以增加算法鲁棒性
@@ -42,9 +42,13 @@
    (横坐标的b，纵坐标是损失函数总值)通过对损失函数进行求导得到b=0时的斜率，然后对斜率乘以一个学习率，用b-lr*斜率，就可以得到一个新的b，
    然后使用新的b，又可以计算得到一个具体的损失函数值，然后...   讲解https://www.bilibili.com/video/BV1XW421F7M4
 @10.当我们在一个对象上调用内置的len()函数时，实际上是在调用该对象的__len__()方法。这个方法的主要作用是返回一个对象的长度。
-@11.model.zero_grad()的作用是将所有模型参数的梯度置为0。
+@11.model.eval()将模型设为评估模式。在评估模式下，模型的所有层都将正常运行，但不会进行反向传播（backpropagation）和参数更新。
+   此外，某些层的行为也会发生改变，如Dropout层将停止dropout，BatchNorm层将使用训练时得到的全局统计数据而不是评估数据集中的批统计数据
+   model.zero_grad()的作用是将所有模型参数的梯度置为0。
    optimizer.zero_grad()的作用是清除所有可训练的torch.Tensor的梯度。
-   zero_grad()清除梯度
+   torch.no_grad()是PyTorch的一个上下文管理器,用于在不需要计算梯度的场景下禁用梯度计算.
+
+   函数后面加下划线'_',意思是对tensor进行in-place类型操作，也就是函数会直接修改输入的Tensor，而不创建新的Tensor对象。
 @12.为对抗过拟合的技术称为正则化（regularization）
    正则化的作用：防止过拟合、提高模型的泛化能力、减小模型复杂度、控制模型的学习速率、提高模型的鲁棒性(对输入微小变化不敏感)。
    常见正则化：L1正则化、L2正则化、Elastic Net正则化、Dropout、早停、数据增强、批量归一化、权重衰减。
@@ -73,6 +77,26 @@
 @17.object类型是其他类诸如int64，float64，str类的基类，其他类都继承object类
 @18.在编写函数时如果要对某些参数设置默认值，那么这个参数之后的参数也必须设置默认值，否则报错。或者最后写这个需要默认值的参数。
     有些python版本会把NA和None都视为缺失值，这导致None类型被错误理解为缺失值。
+@19.查看显卡信息：nvidia-smi
+    使用cpu计算：torch.device('cpu')
+    使用第0个gpu计算：torch.cuda.device('cuda')
+    使用第1个gou计算：torch.cuda.device('cuda:1')
+    查询gpu的数量：torch.cuda.device_count()
+    将net网络移到gpu上：net.to(device = 'cuda'),即将输入和权重都copy到gpu上。
+    都是复制tensor.cuda()与net.to(device)的区别：to(device)时Module的东西，Module只能用to(device)
+@20.一般在使用gpu训练时，一般在net前把data移到gpu上
+@21.填充一般是奇数，步幅一般是偶数，核得大小一般是奇数
+    核大小，填充步幅对网络的影响：填充一般是核大小-1，这样输出的形状大小就会和输入大小一样，便于记忆，也不用考虑输出形状的变化了。
+    步幅1是最好的，当觉得计算量太大了，就会设步幅不为1.
+    卷积神经网络不能每次都让输入维度减半，这样的话就没办法做深的神经网络了，所以有使输出和输入的维度不变的处理
+@22.现在已经有很多经典的网络结构，我们平常使用的时候无需自己设计卷积核，直接套用经典的结构就可。其实网络结构没有想象的那么关键
+    一般的kernel选择3*3，它的视野是很小，但随着网络层数的增加最后的那个3*3里的数对应到第一层的区域就会很大了。
+    也就是说一般小核配合深得神经网络。
+    多层的3*3的卷积，在效果上是可以用更少层的5*5卷积代替，但是3*3的卷积会更快.
+@23.机器学习实际上就是一个压缩算法，将输入压缩成最后的几个输出的值，那么它必定会丢失信息。
+@24.Tensor存储机制：tensor在电脑的储存，分为两个部分(也就是说一个tensor占用了两个内存位置)，
+    一个内存储存了这个tensor的形状size、步长stride、数据的索引等信息，我们把这一部分称之为头信息区（Tensor）；
+    另一个内存储的就是真正的数据，我们称为存储区 （Storage）。
 
 2.矩阵a的截取：a[起始行：结束行，起始列：结束列]，如果只截取某2列为a[,1]，因为第二列的索引是1，
    a[2]只截取第三行
@@ -327,9 +351,16 @@ for i, data in enumerate(train_loader, 1):
    一类是：list、tuple、dict、set、str。二类是：generator（都是Iterator对象），包含生成器和带yield的generator function
    生成器不但可以作用于for，还可以被next函数不断调用并且返回下一个值，可以被next函数不断调用返回下一个值的对象称为迭代器（Iterator）。
 22.next(iterator),iterator--可迭代的对象,iter()把目标转为可迭代的对象，然后通过next(iterator)访问每一个可迭代的对象。
-23.view()相当于reshape、resize，重新调整Tensor的形状。
+23.torch.view()相当于reshape、resize，重新调整Tensor的形状，只能对张量进行操作，不能对numpy操作
    v1 = torch.range(1, 16) 
    v2 = v1.view(4, 4)
+
+   torch.reshape()、numpy.reshape()，reshape不仅能对张量操作，也能对numpy进行操作。
+   reshape把高维 → 低维就是把dim=3的数据直接接到dim=2的下面
+   reshape低维 → 高维就是把dim=2后面的数据截断，放到dim=3的地方。
+   torch.resize()不推荐使用，使用不当它会改变数据
+
+
 24.transforms.ToTensor()这是一个图像转换的操作，将图像从PIL(Python Imaging Library)格式转换为PyTorch的Tensor类型。
    它还会将像素值的范围从[0, 255]缩放到[0, 1]。
 25.transforms.Compose()就是一个把几个对图像的操作连接成一个操作的函数。具体是对图像进行各种转换操作，并用函数compose将这些转换操作组合起来。
@@ -532,13 +563,14 @@ for i, data in enumerate(train_loader, 1):
     [ 1  3  9]  #3的0，1，2次方
     [ 1  4 16]] #4的0，1，2次方
 50.math.gamma(n)=(n-1)!注意是计算传入值n的n-1的阶乘
-51.均匀分布：返回一个张量，包含了从区间[0，1)的均匀分布中抽取的一组随机数
-   torch.rand(*size,out=None)size定义了输出张量的形状，
+51.均匀分布：返回一个张量，包含了从区间[0，1)的均匀分布中抽取的一组随机数，size定义了输出张量的形状
+      torch.rand(*size,out=None)
    标准正态分布：返回一个张量，包含了从均值为0，方差为1的高斯函数中抽取的一组随机数
-   torch.randn(*size,out=None,dtype=None)
-   torch.randn_like(input,dtype=None)生成一个和input同型的随机抽取标准正态分布
-   torch.normal(means, std, out=None)返回一个张量，包含从给定参数means(Tensor),std(Tensor)的离散正态分布中抽取随机数。
-   和randn的区别：normal可以自己设定均值和标准差。
+      torch.randn(*size,out=None,dtype=None)
+      torch.randn_like(input,dtype=None)生成一个和input同型的随机抽取标准正态分布
+   离散正太分布：返回一个张量，包含从给定参数means(Tensor),std(Tensor)的离散正态分布中抽取随机数。
+      torch.normal(means, std, out=None)
+      和randn的区别：normal可以自己设定均值和标准差。
 
    torch.randperm(n, out=None) → 给定参数n，返回一个从[0, n -1) 的随机整数排列,建议使用torch.arange()
 52.super(Net, self).__init__()是指首先找到Net的父类（比如是类NNet），然后把类Net的对象self转换为类NNet的对象，
@@ -609,6 +641,7 @@ for i, data in enumerate(train_loader, 1):
  
    model = MyNet()
    print(model)
+   当要使用MyNet()，也即往里面传数据的时候，实际上完整写法是MyNet.forward(X)，但是一般是MyNet(X)，因为python使用魔法__call__
 
    2.通过OrderedDict中的元组方式打包层，同时可以给各层命名
    import torch.nn as nn
@@ -713,6 +746,13 @@ for i, data in enumerate(train_loader, 1):
    else:
       x_train = torch.cat([x_train,x_part],0)
 
+   torch.stack(input,dim)沿着一个新维度对输入张量序列进行连接。 序列中所有的张量都应该为相同形状
+   列如，把多个二维矩阵连接成一个三维矩阵
+   T1 = torch.tensor([[1, 2, 3],
+        		[4, 5, 6]])
+   T2 = torch.tensor([[10, 20, 30],
+        		[40, 50, 60]])
+   R0 = torch.stack((T1, T2), dim=0)
 61.hashlib加密
    包括hashlib.md5()将任意长度的信息转换为一个 128 位的哈希值
    hashlib.sha1()比md5安全性更高，其他一样
@@ -742,3 +782,11 @@ for i, data in enumerate(train_loader, 1):
    nn.init.constant_()常数初始化
    nn.init.xavier_uniform_(m.weight,mean,std)
    nn.init.uniform_(m.weight,mean,std)
+67.保存张量和加载张量
+   torch.save(obj,str),obj就是要存储的参数，str是想保存的文件名
+   torch.load(str)加载名为str的文件
+   保存模型和加载模型
+   torch.save(net.state_dict(), 'mlp.params')
+   当要加载参数的时候必须把网络给复现了(也就是复制过来)
+   clone = MLP()
+   clone.load_state_dict(torch.load('mlp.params'))

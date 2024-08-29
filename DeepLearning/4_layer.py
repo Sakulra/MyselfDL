@@ -106,11 +106,11 @@ print(rgnet(X))#输出网络结构
 rgnet[0][1][0].bias.data#访问第一个主要的块中、第二个子块的第一层的偏置项
 
 
-#内置初始化......................................................................................................
+#内置初始化...............................................................................................
 #默认初始化，将所有权重参数初始化为标准差为0.01的高斯随机变量， 且将偏置参数设置为0
 def init_normal(m):#m就是一个module，每次传入一个
     if type(m) == nn.Linear:
-        nn.init.normal_(m.weight, mean=0, std=0.01)#带_且在最后面的意思就是，它是一个替换函数，它不会返回一个值，而是直接替换掉传入的m.weight
+        nn.init.normal_(m.weight, mean=0, std=0.01)#在最后面是‘_’意思就是，它是一个替换函数，它不会返回一个值，而是直接替换掉传入的m.weight
         nn.init.zeros_(m.bias)
 net.apply(init_normal)#对net里的所有module调用init_normal这个函数
 print(net[0].weight.data[0], net[0].bias.data[0])
@@ -170,8 +170,10 @@ net[2].weight.data[0, 0] = 100
 # 确保它们实际上是同一个对象，而不只是有相同的值
 print(net[2].weight.data[0] == net[4].weight.data[0])
 
-###自定义层，上面的是自定义网络###################################################################################
 
+###自定义层，上面的是自定义网络,但是本质没有区别，形式上也没区别##########################################################
+
+#构造一个没有任何参数的自定义层
 class CenteredLayer(nn.Module):
     def __init__(self):
         super().__init__()
@@ -180,16 +182,19 @@ class CenteredLayer(nn.Module):
         return X - X.mean()
 
 layer = CenteredLayer()
-layer(torch.FloatTensor([1, 2, 3, 4, 5]))
+print(layer(torch.FloatTensor([1, 2, 3, 4, 5])))
+#output：tensor([-2., -1.,  0.,  1.,  2.])
 
+#将层作为组件合并到构建更复杂的模型中
 net = nn.Sequential(nn.Linear(8, 128), CenteredLayer())
 Y = net(torch.rand(4, 8))
 print(Y.mean())
 
 #带参数的层
 class MyLinear(nn.Module):
-    def __init__(self, in_units, units):
+    def __init__(self, in_units, units):#in_units输入大小，units输出大小
         super().__init__()
+        #把想初始化的参数放进nn.Parameter()中就是为了把梯度加上，并给一个合适的名字，便于后来访问参数
         self.weight = nn.Parameter(torch.randn(in_units, units))
         self.bias = nn.Parameter(torch.randn(units,))
     def forward(self, X):
