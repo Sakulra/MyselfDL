@@ -183,17 +183,3 @@
 #     devices = [torch.device(f'cuda:{i}')
 #              for i in range(torch.cuda.device_count())]
 #     return devices if devices else [torch.device('cpu')]
-
-import torch
-X = torch.normal(0, 1, (3, 3, 3))
-#print('X',X)
-K = torch.normal(0, 1, (2, 3, 1, 1))
-print('K',K)
-c_i, h, w = X.shape
-c_o = K.shape[0]
-X = X.reshape((h * w, c_i))
-K = K.reshape((c_i, c_o))
-print('K2',K)
-B = torch.tensor([[[[1]],[[4]]],[[[7]],[[10]]]])
-print('B',B)
-print(B.reshape(2,2))
