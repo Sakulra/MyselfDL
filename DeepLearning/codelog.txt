@@ -202,7 +202,7 @@ b  3  4
 11.matplotlib允许我们将一个figure通过栅格系统划分成不同的格子，然后在格子中画图，这样就可以在一个figure中画多个图了。
   这里的每个格子有两个名称：Axes和subplot。subplot是从figure所有的格子来看的。因为figure要统一管理协调这些格子的位置、
   间隔等属性，管理协调的方法和属性设置就在subplots的层面进行。Axes是从作为画图者的我们的角度来定义的，我们要画的点、线等
-  都在Axes这个层面来进行。画图用的坐标系统自然也是在Axes中来设置的。
+  都在Axes这个层面来进行。画图用的坐标系统自然也是在Axes中来设置的。Axes数组是np.array类型。
   如果将Matplotlib绘图和我们平常画画相类比，可以把Figure想象成一张纸（一般被称之为画布），Axes代表的则是纸中的一片区域，axis是轴。
   plt绘图：第一种方式的代码来看，先生成了一个Figure画布，然后在这个画布上隐式生成一个画图区域进行画图。
   plt.figure()
@@ -264,7 +264,7 @@ b  3  4
 
   创建子图subplot或subplots：
   区别：subplots() 既创建了一个包含子图区域的画布，又创建了一个 figure 图形对象，而 subplot() 只是创建一个包含子图区域的画布。
-  subplot(nrows, ncols, index)
+  subplot(nrows, ncols, index)index表示在第index个区域进行操作，不管其他区域，索引按照从左到右从上到下编号。。
   subplots(nrows, ncols,sharex=False, sharey=False，figsize)
   示例：
   plt.subplot(221) #两行两列的第1个子图
@@ -785,7 +785,7 @@ for i, data in enumerate(train_loader, 1):
    nn.inin.normal_()正态初始化
    nn.init.zeros_()全零初始化
    nn.init.constant_()常数初始化
-   nn.init.xavier_uniform_(m.weight,mean,std)
+   nn.init.xavier_uniform_(m.weight,mean,std)通过网络层时，使输入和输出的方差相同，避免梯度消失和梯度爆炸，包括前向传播和后向传播。
    nn.init.uniform_(m.weight,mean,std)
 67.保存张量和加载张量
    torch.save(obj,str),obj就是要存储的参数，str是想保存的文件名

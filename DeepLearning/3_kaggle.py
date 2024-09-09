@@ -9,6 +9,7 @@ import pandas as pd
 import torch
 from torch import nn
 from d2l import torch as d2l
+from d2l import oldtorch as oldd2l
 
 #建立字典DATA_HUB,将数据集名称的字符串映射到数据集相关的二元组上,二元组包含数据集的url和验证文件完整性的sha-1密钥.
 #字典形式{'数据集名'：(url,sha1_hsah)}，所有类似的数据集都托管在地址为DATA_URL的站点上.
@@ -219,7 +220,7 @@ def k_fold(k, X_train, y_train, num_epochs, learning_rate, weight_decay,
         #每一折都往train_ls里添加，所以求和的时候每次取train_ls[-1]
         train_l_sum += train_ls[-1]
         valid_l_sum += valid_ls[-1]
-        if i == 0:#为什么是等于0的时候画图，等于0的时候不是还没有数据吗？怎么画出来的图？
+        if i == 0:#当i=0的时候设置画图的各项信息标签，因为标签只需要设置一次就好了而且它画的只是折1时候的损失和
             d2l.plot(list(range(1, num_epochs + 1)), [train_ls, valid_ls],
                      xlabel='epoch', ylabel='rmse', xlim=[1, num_epochs],
                      legend=['train', 'valid'], yscale='log')

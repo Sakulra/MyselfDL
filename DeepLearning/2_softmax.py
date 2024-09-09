@@ -65,7 +65,7 @@ def accuracy(y_hat,y):
         y_hat = y_hat.argmax(axis=1)
         #print(type(y_hat),type(y))
     #先把y_hat换成和y一样的数据类型，然后比较y_hat和y是否在每一个位置上的值相等，使用cmp函数存储bool类型
-    #y_hat和y都是tensor不用转换也行的
+    #y_hat和y都是tensor不用转换也行的,它们都是一维tensor，而且里面的值都是整数。
     cmp = y_hat.type(y.dtype) == y
     #将cmp转化为y的数据类型再求和——得到找出来预测正确的类别数
     return float(cmp.type(y.dtype).sum())
@@ -118,11 +118,14 @@ class Animator:
             legend = []
 
         d2l.use_svg_display()
-
+        #axes是一个二维数组，如果nrows和ncols不都为1的话
         self.fig, self.axes = d2l.plt.subplots(nrows,ncols,figsize=figsize)
         # 判断是否只有1个子图，本来初始化默认就是一个画图区域
         if ncols*nrows == 1:
             self.axes = [self.axes,]#一个子图的话也把它转化为列表，为了跟多个子图保持一致性
+        #如果画图不止一个区域，也就是说不止一个轴，就需要一个一个添加到列表里
+        # else:
+        #     self.axes = [_ for _ in self.axes]
         # 使用lambda函数捕获参数，直接调用d2l.set_axes函数配置子图属性
         self.config_axes = lambda: d2l.set_axes(
             axes=self.axes[0], xlabel=xlabel, ylabel=ylabel, xlim=xlim, ylim=ylim, xscale=xscale, yscale=yscale, legend=legend)
