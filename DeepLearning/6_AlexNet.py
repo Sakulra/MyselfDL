@@ -24,6 +24,8 @@ net = nn.Sequential(
     nn.MaxPool2d(kernel_size=3, stride=2),
     nn.Flatten(),
     # 这里，全连接层的输出数量是LeNet中的好几倍。使用dropout层来减轻过拟合
+    # 最后两层4096的全连接层，非常重要，只用一层的话效果会差很多
+    # 因为前面特征抽取的不是很好，这两个大全连接层来补充
     nn.Linear(6400, 4096), nn.ReLU(),
     nn.Dropout(p=0.5),
     nn.Linear(4096, 4096), nn.ReLU(),
@@ -37,6 +39,7 @@ for layer in net:
     print(layer.__class__.__name__,'output shape:\t',X.shape)
 
 batch_size = 128
+#Fashion-MNIST图像分辨率低于ImageNet图像，将其增加到224x224.
 train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size, resize=224)
 
 lr, num_epochs = 0.01, 10

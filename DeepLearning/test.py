@@ -265,3 +265,47 @@ mat_file = scipy.io.loadmat('D:\\shiyan_data\\cft\\12k2024年7月8日9时25分25
 
 #print(mat_file.keys())
 print(mat_file['T'])
+
+#使用os.walk()用于遍历指定文件下所有的子目录、非目录子文件
+#import os
+# file_dir = "F:/ant"
+# for root, dirs, files in os.walk(file_dir, topdown=False):
+#     print(root)     # 当前目录路径
+#     print(dirs)     # 当前目录下所有子目录
+#     print(files)        # 当前路径下所有非目录子文件
+
+#以数字开头的文件排序os.listdir()用于返回指定的文件夹下包含的文件或文件夹名字的列表，这个列表按字母顺序排序
+# files = os.listdir(file_dir)
+# files.sort(key= lambda x: int(x[:-4]))
+# print(files)
+
+#使用
+
+#分批读取数据，可以使用DataLoader和自定义的Dataset类来实现这一点。
+#你可以设计一个自定义的Dataset类来从磁盘按需加载数据，而不是一次性加载到内存中。
+import torch
+from torch.utils.data import Dataset, DataLoader
+
+class LargeDataset(Dataset):
+    def __init__(self, file_path):
+        self.file_path = file_path
+        # 这里可以进行一些初始化操作，例如记录数据的总大小
+
+    def __len__(self):
+        # 返回数据集的大小
+        return 1000000  # 假设数据总点数为100万
+
+    def __getitem__(self, idx):
+        # 从磁盘加载数据
+        data = self.load_data_from_file(idx)
+        return torch.tensor(data, dtype=torch.float32)
+
+    def load_data_from_file(self, idx):
+        # 这里实现从磁盘加载数据的逻辑
+        # 例如读取数据文件中的一部分，或者从数据库中获取数据
+        pass
+
+dataset = LargeDataset('path/to/data')
+dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
+
+#
