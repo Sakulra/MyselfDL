@@ -283,29 +283,37 @@ print(mat_file['T'])
 
 #分批读取数据，可以使用DataLoader和自定义的Dataset类来实现这一点。
 #你可以设计一个自定义的Dataset类来从磁盘按需加载数据，而不是一次性加载到内存中。
-import torch
-from torch.utils.data import Dataset, DataLoader
+# import torch
+# from torch.utils.data import Dataset, DataLoader
 
-class LargeDataset(Dataset):
-    def __init__(self, file_path):
-        self.file_path = file_path
-        # 这里可以进行一些初始化操作，例如记录数据的总大小
+# class LargeDataset(Dataset):
+#     def __init__(self, file_path):
+#         self.file_path = file_path
+#         # 这里可以进行一些初始化操作，例如记录数据的总大小
 
-    def __len__(self):
-        # 返回数据集的大小
-        return 1000000  # 假设数据总点数为100万
+#     def __len__(self):
+#         # 返回数据集的大小
+#         return 1000000  # 假设数据总点数为100万
 
-    def __getitem__(self, idx):
-        # 从磁盘加载数据
-        data = self.load_data_from_file(idx)
-        return torch.tensor(data, dtype=torch.float32)
+#     def __getitem__(self, idx):
+#         # 从磁盘加载数据
+#         data = self.load_data_from_file(idx)
+#         return torch.tensor(data, dtype=torch.float32)
 
-    def load_data_from_file(self, idx):
-        # 这里实现从磁盘加载数据的逻辑
-        # 例如读取数据文件中的一部分，或者从数据库中获取数据
-        pass
+#     def load_data_from_file(self, idx):
+#         # 这里实现从磁盘加载数据的逻辑
+#         # 例如读取数据文件中的一部分，或者从数据库中获取数据
+#         pass
 
-dataset = LargeDataset('path/to/data')
-dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
+# dataset = LargeDataset('path/to/data')
+# dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
 
-#
+import pandas as pd
+import numpy as np
+
+data = pd.DataFrame([['Alice', 'Math', 93], ['Bob', 'Physics', 98], ['Chris', 'Chemistry', 96], ['David', 'Biology', 90]],
+                    columns=['Name', 'Subject', 'Score'])
+print(data,'\n')
+data1 = data.set_index(keys='Name',append=True)
+print(data1)
+print(data1.columns)
