@@ -1,11 +1,13 @@
 #锚框：以每个像素为中心，生成多个缩放比和宽高比（aspect ratio）不同的边界框
+#首先生成大量锚框，并赋予标号，每个锚框作为一个样本进行训练，在预测时使用NMS去掉冗余预测。
 import torch
 from d2l import torch as d2l
 
 torch.set_printoptions(2)  # 精简输出精度
 
-#@save
-def multibox_prior(data, sizes, ratios):
+#锚框的宽度和高度分别是ws√r和hs/√r，s就是占原图的比例，r就是高宽比
+#一般不进行所有s和r的组合，而是固定s1遍历rm，和固定r1遍历sn
+def multibox_prior(data, sizes:'s', ratios:'高宽比'):
     """生成以每个像素为中心具有不同形状的锚框"""
     in_height, in_width = data.shape[-2:]
     device, num_sizes, num_ratios = data.device, len(sizes), len(ratios)
@@ -43,16 +45,17 @@ def multibox_prior(data, sizes, ratios):
     output = out_grid + anchor_manipulations
     return output.unsqueeze(0)
 
-img = d2l.plt.imread('../img/catdog.jpg')
-h, w = img.shape[:2]
+img = d2l.plt.imread('./pictures/girl2.png')
+h, w = img.shape[:2]#shape[0]行数，shape[1]列数
 
 print(h, w)
-X = torch.rand(size=(1, 3, h, w))
+X = torch.rand(size=(1, 3, h, w))#size(批量大小，rgb，高，宽)
 Y = multibox_prior(X, sizes=[0.75, 0.5, 0.25], ratios=[1, 2, 0.5])
-print(Y.shape)
+print(Y.shape)#torch.Size([1, 10368000, 4])(批量大小，锚框数量，锚框的位置)
 
-boxes = Y.reshape(h, w, 5, 4)
-print(boxes[250, 250, 0, :])
+boxes = Y.reshape(h, w, 5, 4)#5是锚框数量，4是四个值
+#访问以（250,250）为中心的第一个锚框
+print(boxes[250, 250, 0, :])#tensor([-0.08, -0.14,  0.34,  0.61])
 
 #为了显示以图像中以某个像素为中心的所有锚框，定义下面的show_bboxes函数来在图像上绘制多个边界框
 def show_bboxes(axes, bboxes, labels=None, colors=None):
@@ -79,7 +82,7 @@ def show_bboxes(axes, bboxes, labels=None, colors=None):
 d2l.set_figsize()
 bbox_scale = torch.tensor((w, h, w, h))
 fig = d2l.plt.imshow(img)
-show_bboxes(fig.axes, boxes[250, 250, :, :] * bbox_scale,
+show_bboxes(fig.axes, boxes[500, 800, :, :] * bbox_scale,
             ['s=0.75, r=1', 's=0.5, r=1', 's=0.25, r=1', 's=0.75, r=2',
              's=0.75, r=0.5'])
 
@@ -108,6 +111,7 @@ def box_iou(boxes1, boxes2):
     return inter_areas / union_areas
 
 #将真实边界框分配给锚框
+#iou_threshold：当锚框跟任一个真实框的iou小于0.5时就把该锚框扔掉当背景。
 def assign_anchor_to_bbox(ground_truth, anchors, device, iou_threshold=0.5):
     """将最接近的真实边界框分配给锚框"""
     num_anchors, num_gt_boxes = anchors.shape[0], ground_truth.shape[0]
@@ -128,6 +132,7 @@ def assign_anchor_to_bbox(ground_truth, anchors, device, iou_threshold=0.5):
         box_idx = (max_idx % num_gt_boxes).long()
         anc_idx = (max_idx / num_gt_boxes).long()
         anchors_bbox_map[anc_idx] = box_idx
+        #把已分配的行列删掉
         jaccard[:, box_idx] = col_discard
         jaccard[anc_idx, :] = row_discard
     return anchors_bbox_map
@@ -152,8 +157,7 @@ def multibox_target(anchors, labels):
         label = labels[i, :, :]
         anchors_bbox_map = assign_anchor_to_bbox(
             label[:, 1:], anchors, device)
-        bbox_mask = ((anchors_bbox_map >= 0).float().unsqueeze(-1)).repeat(
-            1, 4)
+        bbox_mask = ((anchors_bbox_map >= 0).float().unsqueeze(-1)).repeat(1, 4)
         # 将类标签和分配的边界框坐标初始化为零
         class_labels = torch.zeros(num_anchors, dtype=torch.long,
                                    device=device)
@@ -186,6 +190,7 @@ fig = d2l.plt.imshow(img)
 show_bboxes(fig.axes, ground_truth[:, 1:] * bbox_scale, ['dog', 'cat'], 'k')
 show_bboxes(fig.axes, anchors * bbox_scale, ['0', '1', '2', '3', '4'])
 
+#unsqueeze增加一个批量维度
 labels = multibox_target(anchors.unsqueeze(dim=0),
                          ground_truth.unsqueeze(dim=0))
 
@@ -252,6 +257,7 @@ def multibox_detection(cls_probs, offset_preds, anchors, nms_threshold=0.5,
         out.append(pred_info)
     return torch.stack(out)
 
+#example
 anchors = torch.tensor([[0.1, 0.08, 0.52, 0.92], [0.08, 0.2, 0.56, 0.95],
                       [0.15, 0.3, 0.62, 0.91], [0.55, 0.2, 0.9, 0.88]])
 offset_preds = torch.tensor([0] * anchors.numel())

@@ -734,10 +734,10 @@ for i, data in enumerate(train_loader, 1):
      3	Nevada  2001.0	2.4
      4	Nevada  NaN	   2.9   
    2.DataFrame.set_index(keys, drop=True, append=False, inplace=False, verify_integrity=False)
-   将某一列的内容(Ohio,utah等)，而非列的名字(one,two等)设置为行index
-   drop：删除用作新索引的列，默认为True，删除
-   append：是否将列附加到现有索引，即是否保留原索引默认为False
-   inplace：表示当前操作是否对原数据重新，默认为False
+   将某一列的内容(Ohio,utah等)，而非列的名字(one,two等)设置为行index。
+   drop：删除用作新索引的列，默认为True，删除。
+   append：是否将列附加到现有索引，即是否保留原索引,默认为False。
+   inplace：表示当前操作是否对原数据重新，默认为False。
 
    data11 = data1.set_index(key = 'state')
    print(data1)
@@ -839,3 +839,14 @@ for i, data in enumerate(train_loader, 1):
    angle:绕xy旋转的角度
    rotation_point:绕的旋转点，默认是'xy'也可以是'center'.
    **kwargs:包含由很多其他参数，比如fill，linestyle，linewidth，label等
+70.torch.squeeze()torch.unsqueeze()
+   torch.squeeze(input,dim)用于去除张量中大小为1的维度,如果不指定dim则所谓维度等于1的都会被去除
+      x = torch.tensor([[[1, 2, 3]], [[4, 5, 6]]])  # 形状为 (2, 1, 3)
+      y = torch.squeeze(x)
+      print(y)           # 输出: tensor([[1, 2, 3], [4, 5, 6]])
+      print(y.shape)    # 输出: torch.Size([2, 3])
+   也可指定要去除的维度，只有当指定的维度的大小为1时，才会去除该维度,否则等于没调用函数
+      z = torch.squeeze(x, dim=1)  # 指定去除第 1 维
+   torch.unsqueeze(input,dim)增加输入tensor指定位置的维度
+      例如两行三列的数组A维度为(2，3)，那么这个数组就有三个位置可以增加维度，分别是([位置0] 2，[位置1] 3 [位置2])
+      或者是([位置-3] 2，[位置-2] 3 [位置-1])，如果执行 torch.unsqueeze(A，1)，数据的维度就变为了 （2，1，3）
