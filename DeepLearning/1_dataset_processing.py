@@ -1,5 +1,7 @@
 import torch
 import torchvision
+import time
+import numpy as np
 from torch.utils import data
 from torchvision import transforms
 from d2l import torch as d2l
